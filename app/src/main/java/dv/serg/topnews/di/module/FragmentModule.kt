@@ -1,9 +1,10 @@
 package dv.serg.topnews.di.module
 
+import android.arch.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
 import dv.serg.lib.dagger.PerFragment
-import dv.serg.topnews.ui.viewmodel.ViewModelFactory
+import dv.serg.topnews.ui.viewmodel.RetrofitViewModelFactory
 import retrofit2.Retrofit
 
 @Module
@@ -11,7 +12,7 @@ import retrofit2.Retrofit
 class FragmentModule {
     @PerFragment
     @Provides
-    fun provideViewModelFactory(retrofit: Retrofit): ViewModelFactory {
-        return ViewModelFactory(retrofit)
+    fun provideViewModelFactory(retrofit: Retrofit): ViewModelProvider.Factory {
+        return RetrofitViewModelFactory(retrofit)
     }
 }

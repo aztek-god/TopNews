@@ -9,11 +9,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/fr_news_recycler"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/bottom_swipe_news_ref"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content">
+
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/fr_news_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <!--<include-->
         <!--android:layout_width="match_parent"-->

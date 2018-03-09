@@ -26,6 +26,11 @@ fun ImageView.load(uri: String) {
             }
 }
 
+fun ImageView.loadDrawable(uri: String) {
+    Glide.with(this).load(uri).into(this)
+}
+
+
 fun Context.openBrowser(url: String, chooserTitle: String) {
     val intent = Intent(Intent.ACTION_VIEW)
     val chooser = Intent.createChooser(intent, chooserTitle)

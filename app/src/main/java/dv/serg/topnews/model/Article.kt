@@ -2,12 +2,13 @@ package dv.serg.topnews.model
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
+import dv.serg.topnews.current.SubSource
 
 
 data class Article(
         @SerializedName("source")
         @Expose
-        var source: Source? = null,
+        var source: SubSource? = null,
         @SerializedName("author")
         @Expose
         var author: String? = null,

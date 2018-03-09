@@ -1,6 +1,7 @@
 package dv.serg.topnews.ui.fragment
 
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -20,7 +21,6 @@ import dv.serg.topnews.di.Injector
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.ui.holder.HotNewsHolder
 import dv.serg.topnews.ui.viewmodel.HotNewsViewModel
-import dv.serg.topnews.ui.viewmodel.ViewModelFactory
 import dv.serg.topnews.util.ObservableProperty
 import kotlinx.android.synthetic.main.fragment_info.*
 import javax.inject.Inject
@@ -33,11 +33,11 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     private var isRefreshing = false
 
     private val viewModel by lazy {
-        ViewModelProviders.of(this, viewModelFactory).get(HotNewsViewModel::class.java)
+        ViewModelProviders.of(this, retrofitViewModelFactory).get(HotNewsViewModel::class.java)
     }
 
     @Inject
-    lateinit var viewModelFactory: ViewModelFactory
+    lateinit var retrofitViewModelFactory: ViewModelProvider.Factory
 
     private val propertyObserver: ObservableProperty<Constants.RequestState> = ObservableProperty(Constants.RequestState.IDLE).also { it ->
         it.registerAsObserver(object : ObservableProperty.PropertyObserver<Constants.RequestState> {

@@ -1,6 +1,8 @@
 package dv.serg.topnews.di
 
 import dv.serg.topnews.app.AppContext
+import dv.serg.topnews.current.DaggerSubSourceComponent
+import dv.serg.topnews.current.SubSourceActivity
 import dv.serg.topnews.di.component.AppComponent
 import dv.serg.topnews.di.component.DaggerAppComponent
 import dv.serg.topnews.di.component.DaggerFragmentComponent
@@ -23,5 +25,9 @@ object Injector {
     fun injectFragment(fragment: NewsFragment) {
         DaggerFragmentComponent.builder().appComponent(AppContext.appComponent)
                 .fragmentModule(FragmentModule()).build().inject(fragment)
+    }
+
+    fun injectSubSourceActivity(activity: SubSourceActivity) {
+        DaggerSubSourceComponent.builder().appComponent(AppContext.appComponent).build().inject(activity)
     }
 }

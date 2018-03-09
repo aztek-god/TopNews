@@ -1,5 +1,10 @@
 package dv.serg.topnews.util
 
+import android.support.v4.widget.SwipeRefreshLayout
+import android.util.DisplayMetrics
+import dv.serg.topnews.app.AppContext
+import org.jetbrains.anko.windowManager
+
 interface SwitchActivity {
     fun showDataLayout()
 
@@ -43,4 +48,12 @@ sealed class Outcome<T> {
 fun <E> MutableList<E>.update(data: List<E>) {
     clear()
     addAll(data)
+}
+
+fun SwipeRefreshLayout.showAtBottomMode() {
+    val displayMetrics = DisplayMetrics()
+    AppContext.appContext.windowManager.defaultDisplay.getMetrics(displayMetrics)
+    val height = displayMetrics.heightPixels
+
+    setProgressViewOffset(true, 0, (height / 100) * 80)
 }

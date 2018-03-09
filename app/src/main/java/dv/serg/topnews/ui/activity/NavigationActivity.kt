@@ -134,7 +134,7 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
             }
         }
 
-        supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr, tag).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr).commit()
     }
 
     fun getFragmentByTag(tag: String): Fragment? {

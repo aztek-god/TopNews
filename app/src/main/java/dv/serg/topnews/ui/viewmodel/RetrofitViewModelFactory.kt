@@ -5,7 +5,7 @@ import android.arch.lifecycle.ViewModelProvider
 import retrofit2.Retrofit
 
 @Suppress("UNCHECKED_CAST")
-class ViewModelFactory(private val retrofit: Retrofit) : ViewModelProvider.Factory {
+class RetrofitViewModelFactory(private val retrofit: Retrofit) : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T =
             with(modelClass) {
                 when {
