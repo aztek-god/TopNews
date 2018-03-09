@@ -120,6 +120,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                             }
                         }
                         is Outcome.Failure -> {
+                            logd("Outcome.Failure. it = ${it}")
                             toastShort(it.toString())
                         }
                     }

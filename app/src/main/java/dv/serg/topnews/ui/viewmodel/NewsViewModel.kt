@@ -3,6 +3,7 @@ package dv.serg.topnews.ui.viewmodel
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import dv.serg.lib.collection.StandardAdapter
+import dv.serg.lib.utils.logd
 import dv.serg.topnews.app.performOnIoThread
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.model.Response
@@ -43,11 +44,13 @@ class NewsViewModel(private val retrofit: Retrofit) : ViewModel() {
                     .requestWithQuery("lenta", query)
         }
 
+        logd("NewsViewModel:requestData:response = $response")
+
         compositeDisposable.add(
                 response.performOnIoThread()
                         .doOnSubscribe { liveNewsResult.value = Outcome.loading(true) }
                         .doOnComplete { liveNewsResult.value = Outcome.loading(false) }
-                        .cache()
+//                        .cache()
                         .flatMap {
                             Flowable.just(it.articles)
                         }
@@ -56,6 +59,7 @@ class NewsViewModel(private val retrofit: Retrofit) : ViewModel() {
                                     liveNewsResult.value = Outcome.success(it ?: emptyList())
                                 },
                                 {
+                                    logd("NewsViewModel:requestData:liveNewsResult.value = $it")
                                     liveNewsResult.value = Outcome.failure(it)
                                 }
                         ))
