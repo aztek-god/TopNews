@@ -10,6 +10,7 @@ import dv.serg.topnews.di.module.AppModule
 import dv.serg.topnews.di.module.FragmentModule
 import dv.serg.topnews.ui.fragment.InfoFragment
 import dv.serg.topnews.ui.fragment.NewsFragment
+import dv.serg.topnews.ui.fragment.SubscribeFragment
 
 
 object Injector {
@@ -23,6 +24,11 @@ object Injector {
     }
 
     fun injectFragment(fragment: NewsFragment) {
+        DaggerFragmentComponent.builder().appComponent(AppContext.appComponent)
+                .fragmentModule(FragmentModule()).build().inject(fragment)
+    }
+
+    fun injectFragment(fragment: SubscribeFragment) {
         DaggerFragmentComponent.builder().appComponent(AppContext.appComponent)
                 .fragmentModule(FragmentModule()).build().inject(fragment)
     }
