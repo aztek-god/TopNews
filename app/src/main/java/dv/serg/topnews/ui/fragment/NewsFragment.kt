@@ -1,21 +1,22 @@
 package dv.serg.topnews.ui.fragment
 
+import android.app.Activity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import dv.serg.lib.android.context.v4.toastShort
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
+import dv.serg.topnews.current.SubSourceActivity
 import dv.serg.topnews.di.Injector
+import dv.serg.topnews.ui.activity.SearchActivity
 import dv.serg.topnews.ui.holder.NewsViewHolder
 import dv.serg.topnews.ui.viewmodel.NewsViewModel
 import dv.serg.topnews.util.Outcome
@@ -27,15 +28,14 @@ import javax.inject.Inject
 
 class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
-
     @Inject
-    lateinit var retrofitViewModelFactory: ViewModelProvider.Factory
+    lateinit var viewModelFactory: ViewModelProvider.Factory
 
     private var queryListener: SearchQueryObservable? = null
     private var switchActivity: SwitchActivity? = null
 
-    private val viewModel: NewsViewModel by lazy {
-        ViewModelProviders.of(this, retrofitViewModelFactory).get(NewsViewModel::class.java)
+    private val vm: NewsViewModel by lazy {
+        ViewModelProviders.of(this, viewModelFactory).get(NewsViewModel::class.java)
     }
 
     override fun onAttach(context: Context?) {
@@ -61,7 +61,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         setHasOptionsMenu(true)
 
         if (savedInstanceState == null) {
-            viewModel.standardAdapter = StandardAdapter(R.layout.news_item_layout, { view: View ->
+            vm.standardAdapter = StandardAdapter(R.layout.news_item_layout, { view: View ->
                 NewsViewHolder(view) {
                     when (it) {
                         is NewsViewHolder.OpenBrowserException -> {
@@ -87,7 +87,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
 
 
-        fr_news_recycler.adapter = viewModel.standardAdapter
+        fr_news_recycler.adapter = vm.standardAdapter
         fr_news_recycler.apply {
             layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         }
@@ -97,16 +97,16 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
 
-        viewModel.liveNewsResult.observe(
+        vm.liveNewsResult.observe(
                 this,
                 Observer {
                     when (it) {
                         is Outcome.Success -> {
                             logd("Outcome.Success is loaded. it = ${it}")
                             if (it.type == Outcome.Type.UPDATABLE) {
-                                viewModel.standardAdapter.update(it.data)
+                                vm.standardAdapter.update(it.data)
                             } else if (it.type == Outcome.Type.APPENDABLE) {
-                                viewModel.standardAdapter.addAll(it.data)
+                                vm.standardAdapter.addAll(it.data)
                             }
 
                             swipe_news_ref.isRefreshing = false
@@ -128,35 +128,63 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         )
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        super.onOptionsItemSelected(item)
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.navigation_menu, menu)
+    }
 
-        when (item?.itemId) {
-            R.id.action_refresh -> {
-                viewModel.requestData(queryListener?.query ?: "")
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+            R.id.action_settings -> true
+            R.id.action_search -> {
+                startActivityForResult(Intent(activity, SearchActivity::class.java), SearchActivity.SEARCH_QUERY_CODE)
+                activity?.overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
+                true
+                // todo implement refresh button here
+            }
+            R.id.action_subscription -> {
+                startActivityForResult(Intent(activity, SubSourceActivity::class.java), SubSourceActivity.SUBSCRIPTION_RESULT_CODE)
+                activity?.overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == SearchActivity.SEARCH_QUERY_CODE) {
+                val searchQuery = data?.getStringExtra(SearchActivity.SEARCH_QUERY)
+                if (vm.mQuery != searchQuery) {
+                    vm.mQuery = searchQuery ?: ""
+                    vm.requestData()
+                }
+            }
+            if (requestCode == SubSourceActivity.SUBSCRIPTION_RESULT_CODE) {
+                vm.mQuery = ""
+                vm.requestData()
             }
         }
-        return false
     }
 
 
     override fun onResume() {
         super.onResume()
-//        viewModel.requestData()
-
-        viewModel.requestData(queryListener?.query ?: "")
-
+        // todo sort out it
+        vm.requestData()
     }
 
     override fun onPause() {
         super.onPause()
 
         // todo implement subscribe/unsubscribe logic
-//        viewModel.unsubscribe()
+//        vm.unsubscribe()
     }
 
     override fun onRefresh() {
-        viewModel.requestData(queryListener?.query ?: "")
+        vm.requestData()
     }
 
     interface SearchQueryObservable {
@@ -165,7 +193,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
 
     companion object {
-        private const val QUERY = "query"
+        private const val QUERY = "mQuery"
 
         fun newInstance(query: String = ""): NewsFragment {
             val instance = NewsFragment()

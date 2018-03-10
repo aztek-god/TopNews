@@ -11,5 +11,9 @@ class SubSourceActivity : AppCompatActivity() {
         setContentView(R.layout.activity_subscribe)
         setSupportActionBar(toolbar)
     }
+
+    companion object {
+        val SUBSCRIPTION_RESULT_CODE = 106
+    }
 }
 

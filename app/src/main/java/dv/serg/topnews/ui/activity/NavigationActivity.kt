@@ -1,14 +1,11 @@
 package dv.serg.topnews.ui.activity
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.IdRes
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import dv.serg.lib.utils.logd
@@ -53,42 +50,11 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
     }
 
     override fun onBackPressed() {
+        // todo implements double click exit
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.navigation, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_settings -> return true
-            R.id.action_search -> {
-                startActivityForResult(Intent(this, SearchActivity::class.java), SearchActivity.SEARCH_QUERY_CODE)
-                overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
-                return true
-            }
-            else -> return super.onOptionsItemSelected(item)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == SearchActivity.SEARCH_QUERY_CODE) {
-                query = data?.getStringExtra(SearchActivity.SEARCH_QUERY) ?: ""
-            }
-        }
-
-        data?.let {
-            currentLayoutId = R.id.news_item
-            handleFragment(currentLayoutId)
         }
     }
 

@@ -12,6 +12,7 @@ import android.view.*
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
+import dv.serg.topnews.current.SubSourceActivity
 import dv.serg.topnews.current.SubSourceViewHolder
 import dv.serg.topnews.current.SubSourceViewModel
 import dv.serg.topnews.di.Injector
@@ -74,6 +75,15 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
         }
     }
 
+//
+//    val resultIntent: Intent = Intent().apply {
+//        putExtra(SearchActivity.SEARCH_QUERY, searchQuery)
+//    }
+//
+//    setResult(Activity.RESULT_OK, resultIntent)
+//    finish()
+//    overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
+
     override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
         item?.let {
             when (it.itemId) {
@@ -85,6 +95,10 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
                                 subSourceAdapter?.forEach { it.isSelected = false }
                                 subSourceAdapter?.notifyDataSetChanged()
                             }
+
+                            activity?.setResult(SubSourceActivity.SUBSCRIPTION_RESULT_CODE)
+                            activity?.finish()
+                            activity?.overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
                         }
                     }
                     vm.actionMode?.finish()
@@ -98,7 +112,7 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
     }
 
     override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        mode?.menuInflater?.inflate(R.menu.action_mode_source_subscription, menu)
+        mode?.menuInflater?.inflate(R.menu.action_mode_source_menu, menu)
         return true
     }
 

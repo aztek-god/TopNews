@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModel
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.app.performOnIoThread
+import dv.serg.topnews.current.SubSourceViewModel
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.model.Response
 import dv.serg.topnews.ui.holder.NewsViewHolder
@@ -15,7 +16,7 @@ import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-class NewsViewModel(private val retrofit: Retrofit) : ViewModel() {
+class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: SubSourceViewModel.Contract.Repository) : ViewModel() {
 
     private interface NewsService {
         @GET("everything")
@@ -34,35 +35,46 @@ class NewsViewModel(private val retrofit: Retrofit) : ViewModel() {
 
     lateinit var standardAdapter: StandardAdapter<Article, NewsViewHolder>
 
+    var mQuery: String = ""
 
-    fun requestData(query: String = "") {
-        val response: Flowable<Response> = if (query.isEmpty()) {
-            retrofit.create(NewsService::class.java)
-                    .request("lenta")
-        } else {
-            retrofit.create(NewsService::class.java)
-                    .requestWithQuery("lenta", query)
-        }
+    fun requestData() {
+        subscribeRepo.getAll()
+                .performOnIoThread()
+                .flatMap {
+                    val s = it.joinToString(",", transform = { it.code })
+                    Flowable.just(if (s.isNotEmpty()) s else "lenta")
+                }.subscribe {
+                    val sources: String? = it
+                    logd("subscribeRepo.getAll:sources = $sources")
 
-        logd("NewsViewModel:requestData:response = $response")
+                    val response: Flowable<Response> = if (mQuery.isEmpty()) {
+                        retrofit.create(NewsService::class.java)
+                                .request(sources ?: "lenta")
+                    } else {
+                        retrofit.create(NewsService::class.java)
+                                .requestWithQuery(sources ?: "lenta", mQuery)
+                    }
 
-        compositeDisposable.add(
-                response.performOnIoThread()
-                        .doOnSubscribe { liveNewsResult.value = Outcome.loading(true) }
-                        .doOnComplete { liveNewsResult.value = Outcome.loading(false) }
-//                        .cache()
-                        .flatMap {
-                            Flowable.just(it.articles)
-                        }
-                        .subscribe(
-                                {
-                                    liveNewsResult.value = Outcome.success(it ?: emptyList())
-                                },
-                                {
-                                    logd("NewsViewModel:requestData:liveNewsResult.value = $it")
-                                    liveNewsResult.value = Outcome.failure(it)
-                                }
-                        ))
+                    logd("NewsViewModel:requestData:response = $response")
+
+                    compositeDisposable.add(
+                            response.performOnIoThread()
+                                    .doOnSubscribe { liveNewsResult.value = Outcome.loading(true) }
+                                    .doOnComplete { liveNewsResult.value = Outcome.loading(false) }
+                                    .flatMap {
+                                        Flowable.just(it.articles)
+                                    }
+                                    .subscribe(
+                                            {
+                                                liveNewsResult.value = Outcome.success(it
+                                                        ?: emptyList())
+                                            },
+                                            {
+                                                logd("NewsViewModel:requestData:liveNewsResult.value = $it")
+                                                liveNewsResult.value = Outcome.failure(it)
+                                            }
+                                    ))
+                }
     }
 
     fun unsubscribe() {
