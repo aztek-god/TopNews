@@ -8,14 +8,17 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
 import android.view.View
+import dv.serg.lib.android.context.toastShort
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
 import dv.serg.topnews.ui.fragment.HotNewsFragment
 import dv.serg.topnews.ui.fragment.NewsFragment
 import dv.serg.topnews.util.SwitchActivity
+import io.reactivex.Observable
 import kotlinx.android.synthetic.main.activity_navigation.*
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.content_navigation.*
+import java.util.concurrent.TimeUnit
 
 class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSelectedListener, NewsFragment.SearchQueryObservable, SwitchActivity {
 
@@ -50,12 +53,27 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
     }
 
     override fun onBackPressed() {
-        // todo implements double click exit
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
-        } else {
+        }
+        if (doOnBackPressed()) {
             super.onBackPressed()
         }
+    }
+
+    private var isBackPressed = false
+
+    private fun doOnBackPressed(): Boolean {
+        if (isBackPressed) {
+            return true
+        }
+
+        isBackPressed = true
+
+        toastShort(getString(R.string.toast_button_exit_message))
+        Observable.timer(2, TimeUnit.SECONDS).subscribe { isBackPressed = false }
+
+        return false
     }
 
     private var currentLayoutId: Int = R.id.hot_news_item
