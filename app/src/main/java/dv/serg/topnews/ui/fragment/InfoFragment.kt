@@ -61,6 +61,7 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Injector.injectFragment(this)
 
         super.onCreate(savedInstanceState)
         if (arguments != null) {
@@ -68,6 +69,15 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         setHasOptionsMenu(true)
+
+        if (savedInstanceState == null) {
+            vm.standardAdapter = StandardAdapter(R.layout.hot_news_item_layout, { e: View ->
+                HotNewsHolder(e, { pos ->
+                    vm.saveBookmark(vm.standardAdapter[pos])
+                })
+            })
+            vm.propertyObserver = propertyObserver
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -95,16 +105,6 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        Injector.injectFragment(this)
-
-        if (savedInstanceState == null) {
-            vm.standardAdapter = StandardAdapter(R.layout.hot_news_item_layout, { e: View ->
-                HotNewsHolder(e, { pos ->
-                    vm.saveBookmark(vm.standardAdapter[pos])
-                })
-            })
-            vm.propertyObserver = propertyObserver
-        }
 
         fr_recycler.adapter = vm.standardAdapter
 

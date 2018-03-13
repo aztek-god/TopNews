@@ -9,7 +9,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import dv.serg.lib.android.context.v4.toastShort
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.topnews.R
 import dv.serg.topnews.di.Injector
@@ -39,9 +38,9 @@ class BookmarkFragment : Fragment() {
         if (vm.adapter == null) {
             vm.adapter = StandardAdapter(R.layout.history_item_layout, { view ->
                 HistoryViewHolder(view = view, actionButtonCallback = {
-                    toastShort("Pressed actionButtonCallback")
+                    TODO("implement button")
                 }, actionDeleteCallback = {
-                    toastShort("Pressed actionDeleteCallback")
+                    TODO("implement button")
                 })
             })
         }
@@ -49,6 +48,7 @@ class BookmarkFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        activity?.actionBar?.setDisplayHomeAsUpEnabled(true)
         return inflater.inflate(R.layout.fragment_record, container, false)
     }
 
@@ -66,6 +66,13 @@ class BookmarkFragment : Fragment() {
         record_recycler.apply {
             adapter = vm.adapter
             layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        }
+    }
+
+
+    companion object {
+        fun newInstance(): BookmarkFragment {
+            return BookmarkFragment()
         }
     }
 

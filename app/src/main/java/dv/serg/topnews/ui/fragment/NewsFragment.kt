@@ -65,10 +65,10 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                 NewsViewHolder(view) {
                     when (it) {
                         is NewsViewHolder.OpenBrowserException -> {
-                            toastShort("${it.message}")
+                            TODO()
                         }
                         is NewsViewHolder.LoadImageException -> {
-                            toastShort("${it.message}")
+                            TODO()
                         }
                     }
                 }

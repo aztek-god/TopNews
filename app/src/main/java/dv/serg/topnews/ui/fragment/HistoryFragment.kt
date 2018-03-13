@@ -50,6 +50,7 @@ class HistoryFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        activity?.actionBar?.setDisplayHomeAsUpEnabled(true)
         return inflater.inflate(R.layout.fragment_record, container, false)
     }
 
@@ -70,4 +71,10 @@ class HistoryFragment : Fragment() {
         }
     }
 
+
+    companion object {
+        fun newInstance(): HistoryFragment {
+            return HistoryFragment()
+        }
+    }
 }

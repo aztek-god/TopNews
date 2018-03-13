@@ -42,14 +42,8 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
         mCompatActivity = null
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        logd("SubscribeFragment:onCreateView")
-        return inflater.inflate(R.layout.fr_subscribe_layout, container, true)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        Injector.injectFragment(this)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         if (vm.subSourceAdapter == null) {
             vm.subSourceAdapter = StandardAdapter(R.layout.news_resource_layout, { v ->
@@ -68,21 +62,23 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
                 addAll(vm.availableSources)
             }
         }
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        logd("SubscribeFragment:onCreateView")
+        return inflater.inflate(R.layout.fr_subscribe_layout, container, true)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        Injector.injectFragment(this)
+
 
         fr_sub_recycler.apply {
             adapter = vm.subSourceAdapter
             layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         }
     }
-
-//
-//    val resultIntent: Intent = Intent().apply {
-//        putExtra(SearchActivity.SEARCH_QUERY, searchQuery)
-//    }
-//
-//    setResult(Activity.RESULT_OK, resultIntent)
-//    finish()
-//    overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
 
     override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
         item?.let {

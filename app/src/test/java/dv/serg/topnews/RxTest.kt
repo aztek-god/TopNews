@@ -1,6 +1,8 @@
 package dv.serg.topnews
 
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import org.junit.Test
 import java.util.concurrent.TimeUnit
 
@@ -59,5 +61,18 @@ class RxTest {
     @Test
     fun testTimeInterval() {
         Observable.range(1, 9).timeInterval().subscribe { println(it) }
+    }
+
+    @Test
+    fun publisherTest() {
+        val subject: Subject<String> = PublishSubject.create()
+
+        subject.subscribe { println(it) }
+        subject.subscribe { println(it.hashCode()) }
+
+        Observable.just("1", "2").share()
+                .doOnNext {
+                    subject.onNext(it)
+                }.subscribe()
     }
 }
