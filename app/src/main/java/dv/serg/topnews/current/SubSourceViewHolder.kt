@@ -8,6 +8,7 @@ import android.widget.TextView
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.topnews.R
 
+
 class SubSourceViewHolder(private val view: View, private val clickListener: () -> Unit) : RecyclerView.ViewHolder(view),
         StandardAdapter.BindViewHolder<SubSource, SubSourceViewHolder> {
 

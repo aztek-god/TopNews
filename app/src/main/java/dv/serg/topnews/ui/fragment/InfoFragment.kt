@@ -32,7 +32,7 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     // todo sort out this
     private var isRefreshing = false
 
-    private val viewModel by lazy {
+    private val vm by lazy {
         ViewModelProviders.of(this, retrofitViewModelFactory).get(HotNewsViewModel::class.java)
     }
 
@@ -98,19 +98,23 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         Injector.injectFragment(this)
 
         if (savedInstanceState == null) {
-            viewModel.standardAdapter = StandardAdapter(R.layout.hot_news_item_layout, { e: View -> HotNewsHolder(e) })
-            viewModel.propertyObserver = propertyObserver
+            vm.standardAdapter = StandardAdapter(R.layout.hot_news_item_layout, { e: View ->
+                HotNewsHolder(e, { pos ->
+                    vm.saveBookmark(vm.standardAdapter[pos])
+                })
+            })
+            vm.propertyObserver = propertyObserver
         }
 
-        fr_recycler.adapter = viewModel.standardAdapter
+        fr_recycler.adapter = vm.standardAdapter
 
-        viewModel.liveNewsResult.observe(this,
+        vm.liveNewsResult.observe(this,
                 Observer { it: List<Article>? ->
-                    viewModel.standardAdapter.addAll(it ?: emptyList())
+                    vm.standardAdapter.addAll(it ?: emptyList())
                 }
         )
 
-        viewModel.liveNewsErrors.observe(this,
+        vm.liveNewsErrors.observe(this,
                 Observer {
                     toastShort("Error occured")
                     propertyObserver.updateValue(Constants.RequestState.ERROR)
@@ -136,17 +140,17 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onPause() {
         super.onPause()
-        viewModel.unsubscribe()
+        vm.unsubscribe()
     }
 
     override fun onRefresh() {
         checkNotNull(mSourceType)
-        viewModel.requestData(mSourceType!!)
+        vm.requestData(mSourceType!!)
     }
 
     private fun requestData() {
         isRefreshing = true
-        viewModel.requestData(mSourceType ?: "")
+        vm.requestData(mSourceType ?: "")
     }
 
     private fun doOnIdle() {

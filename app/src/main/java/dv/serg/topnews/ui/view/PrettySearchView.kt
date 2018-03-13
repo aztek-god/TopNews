@@ -31,7 +31,7 @@ class PrettySearchView(paramContext: Context, private val attrs: AttributeSet) :
 
         ta.recycle()
 
-        editSearch.setOnKeyListener { view, keyCode, keyEvent ->
+        editSearch.setOnKeyListener { _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
                 searchListener?.onSearchAction(editSearch.text.toString())
                 true

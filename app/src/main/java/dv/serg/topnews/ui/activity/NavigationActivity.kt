@@ -11,6 +11,8 @@ import android.view.View
 import dv.serg.lib.android.context.toastShort
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
+import dv.serg.topnews.ui.fragment.BookmarkFragment
+import dv.serg.topnews.ui.fragment.HistoryFragment
 import dv.serg.topnews.ui.fragment.HotNewsFragment
 import dv.serg.topnews.ui.fragment.NewsFragment
 import dv.serg.topnews.util.SwitchActivity
@@ -93,32 +95,31 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
         logd("${hashCode()} handleFragment{menuItemRes = $menuItemRes}")
 
         var fr: Fragment? = null
-        var tag: String? = null
 
         when (menuItemRes) {
             R.id.hot_news_item -> {
-                tag = HotNewsFragment::class.java.name
-                fr = getFragmentByTag(tag)
-                if (fr == null) {
-                    fr = HotNewsFragment.newInstance()
-                }
+                fr = HotNewsFragment.newInstance()
             }
             R.id.news_item -> {
-                tag = NewsFragment::class.java.name
-                fr = getFragmentByTag(tag)
-                if (fr == null) {
-                    fr = NewsFragment.newInstance()
-                }
+                fr = NewsFragment.newInstance()
             }
             R.id.history_item -> {
-
+                fr = HistoryFragment()
             }
             R.id.bookmark_item -> {
-
+                fr = BookmarkFragment()
             }
         }
 
-        supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr, fr!!.javaClass.name.toString()).commit()
+
+//        supportFragmentManager.fragments.forEach {
+//            if(fr != it) {
+//                supportFragmentManager.beginTransaction().hide(fr).commit()
+//            }
+//        }
+
+        logd("supportFragmentManager.fragments = ${supportFragmentManager.fragments}")
     }
 
     fun getFragmentByTag(tag: String): Fragment? {

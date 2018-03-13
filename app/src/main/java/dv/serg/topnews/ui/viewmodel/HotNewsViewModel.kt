@@ -4,11 +4,14 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.ViewModel
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.topnews.app.Constants
+import dv.serg.topnews.dao.ArticleContract
 import dv.serg.topnews.extension.toLiveData
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.model.Response
 import dv.serg.topnews.ui.holder.HotNewsHolder
 import dv.serg.topnews.util.ObservableProperty
+import io.reactivex.Completable
+import io.reactivex.CompletableTransformer
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -18,7 +21,7 @@ import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-class HotNewsViewModel(private val retrofit: Retrofit) : ViewModel() {
+class HotNewsViewModel(private val retrofit: Retrofit, private val repo: ArticleContract.ArticleDao) : ViewModel() {
 
     private interface NewsService {
         @GET("top-headlines")
@@ -37,6 +40,28 @@ class HotNewsViewModel(private val retrofit: Retrofit) : ViewModel() {
     lateinit var propertyObserver: ObservableProperty<Constants.RequestState>
 
     lateinit var standardAdapter: StandardAdapter<Article, HotNewsHolder>
+
+    fun saveHistory(article: Article) {
+        article.type = Article.Type.HISTORY
+        Completable.fromAction {
+            repo.insert(article)
+        }.compose(outsideOfMainThread())
+                .subscribe()
+
+    }
+
+    fun saveBookmark(article: Article) {
+        article.type = Article.Type.BOOKMARK
+        Completable.fromAction {
+            repo.insert(article)
+        }.compose(outsideOfMainThread())
+                .subscribe()
+    }
+
+
+    private fun outsideOfMainThread(): CompletableTransformer {
+        return CompletableTransformer { upstream -> upstream.subscribeOn(Schedulers.io()).unsubscribeOn(Schedulers.io()) }
+    }
 
     fun requestData(categoryDescriptor: String) {
         compositeDisposable.add(

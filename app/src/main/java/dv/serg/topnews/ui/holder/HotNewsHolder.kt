@@ -13,7 +13,7 @@ import dv.serg.topnews.app.load
 import dv.serg.topnews.model.Article
 
 
-class HotNewsHolder(private val view: View) : RecyclerView.ViewHolder(view), StandardAdapter.BindViewHolder<Article, HotNewsHolder> {
+class HotNewsHolder(private val view: View, private val action: (pos: Int) -> Unit) : RecyclerView.ViewHolder(view), StandardAdapter.BindViewHolder<Article, HotNewsHolder> {
 
     private val sourceName: TextView = view.findViewById(R.id.source)
     private val thumb: ImageView = view.findViewById(R.id.thumb)
@@ -21,6 +21,7 @@ class HotNewsHolder(private val view: View) : RecyclerView.ViewHolder(view), Sta
     private val publishedAt: TextView = view.findViewById(R.id.published_at)
 
     override fun onBind(position: Int, item: Article) {
+
         sourceName.text = item.sourceName
         // todo if there is no image, for example ref is equal to null, then use default error placeholder
         thumb.load(item.urlToImage ?: "")
@@ -29,6 +30,7 @@ class HotNewsHolder(private val view: View) : RecyclerView.ViewHolder(view), Sta
 
         view.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
+            action.invoke(position)
             view.context.startActivity(intent)
         }
     }
