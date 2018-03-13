@@ -134,7 +134,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
-            R.id.action_settings -> true
             R.id.action_search -> {
                 startActivityForResult(Intent(activity, SearchActivity::class.java), SearchActivity.SEARCH_QUERY_CODE)
                 activity?.overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
