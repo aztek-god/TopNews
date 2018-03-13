@@ -22,7 +22,7 @@ import dv.serg.topnews.model.Article
 import dv.serg.topnews.ui.holder.HotNewsHolder
 import dv.serg.topnews.ui.viewmodel.HotNewsViewModel
 import dv.serg.topnews.util.ObservableProperty
-import kotlinx.android.synthetic.main.fragment_info.*
+import kotlinx.android.synthetic.main.simple_list_layout.*
 import javax.inject.Inject
 
 class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
@@ -84,7 +84,7 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                               savedInstanceState: Bundle?): View? {
 
         super.onCreateView(inflater, container, savedInstanceState)
-        return inflater.inflate(R.layout.fragment_info, container, false)
+        return inflater.inflate(R.layout.simple_list_layout, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

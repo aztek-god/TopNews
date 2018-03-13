@@ -16,7 +16,7 @@ import dv.serg.topnews.current.SubSourceActivity
 import dv.serg.topnews.current.SubSourceViewHolder
 import dv.serg.topnews.current.SubSourceViewModel
 import dv.serg.topnews.di.Injector
-import kotlinx.android.synthetic.main.fr_subscribe_layout.*
+import kotlinx.android.synthetic.main.simple_list_layout.*
 import javax.inject.Inject
 
 class SubscribeFragment : Fragment(), ActionMode.Callback {
@@ -66,7 +66,7 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         logd("SubscribeFragment:onCreateView")
-        return inflater.inflate(R.layout.fr_subscribe_layout, container, true)
+        return inflater.inflate(R.layout.simple_list_layout, container, true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,7 +74,7 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
         Injector.injectFragment(this)
 
 
-        fr_sub_recycler.apply {
+        fr_recycler.apply {
             adapter = vm.subSourceAdapter
             layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         }

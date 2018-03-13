@@ -17,7 +17,7 @@ import dv.serg.topnews.model.Article
 import dv.serg.topnews.ui.holder.HistoryViewHolder
 import dv.serg.topnews.ui.viewmodel.RecordViewModel
 import dv.serg.topnews.util.update
-import kotlinx.android.synthetic.main.fragment_record.*
+import kotlinx.android.synthetic.main.simple_list_layout.*
 import javax.inject.Inject
 
 
@@ -51,7 +51,7 @@ class HistoryFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         activity?.actionBar?.setDisplayHomeAsUpEnabled(true)
-        return inflater.inflate(R.layout.fragment_record, container, false)
+        return inflater.inflate(R.layout.simple_list_layout, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -65,7 +65,7 @@ class HistoryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        record_recycler.apply {
+        fr_recycler.apply {
             adapter = vm.adapter
             layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         }

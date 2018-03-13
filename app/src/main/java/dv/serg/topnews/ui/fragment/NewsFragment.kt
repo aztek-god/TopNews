@@ -22,7 +22,7 @@ import dv.serg.topnews.ui.viewmodel.NewsViewModel
 import dv.serg.topnews.util.Outcome
 import dv.serg.topnews.util.SwitchActivity
 import dv.serg.topnews.util.update
-import kotlinx.android.synthetic.main.fragment_news.*
+import kotlinx.android.synthetic.main.simple_list_layout.*
 import javax.inject.Inject
 
 
@@ -79,20 +79,19 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        return inflater.inflate(R.layout.fragment_news, container, false)
+        return inflater.inflate(R.layout.simple_list_layout, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
 
-
-        fr_news_recycler.adapter = vm.standardAdapter
-        fr_news_recycler.apply {
+        fr_recycler.adapter = vm.standardAdapter
+        fr_recycler.apply {
             layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         }
 
-        swipe_news_ref.apply {
+        swipe_ref.apply {
             setOnRefreshListener(this@NewsFragment)
         }
 
@@ -109,7 +108,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                                 vm.standardAdapter.addAll(it.data)
                             }
 
-                            swipe_news_ref.isRefreshing = false
+                            swipe_ref.isRefreshing = false
                         }
                         is Outcome.Progress -> {
                             if (it.isLoading) {
