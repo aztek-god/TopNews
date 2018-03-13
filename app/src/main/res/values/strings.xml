@@ -47,4 +47,5 @@
     <string name="title_activity_subscribe">SubscribeActivity</string>
     <string name="action_mode_selected_sources">Sources selected</string>
     <string name="toast_button_exit_message">Please press button again to exit</string>
+    <string name="search_view_hint">Search</string>
 </resources>

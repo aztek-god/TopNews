@@ -59,6 +59,8 @@ class SearchActivity : LoggingActivity() {
             }
 
         })
+
+        search_view.setHint(getString(R.string.search_view_hint))
     }
 
     override fun onBackPressed() {

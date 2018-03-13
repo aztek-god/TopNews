@@ -37,7 +37,6 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:background="#ffffff"
-            android:hint="Search product"
             android:imeOptions="actionSearch"
             android:maxLines="1"
             android:singleLine="true"

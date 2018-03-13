@@ -12,7 +12,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import dv.serg.topnews.R
 
-class PrettySearchView(paramContext: Context, private val attrs: AttributeSet) : CardView(paramContext, attrs) {
+class PrettySearchView(paramContext: Context, attrs: AttributeSet) : CardView(paramContext, attrs) {
     private val hostView: View = View.inflate(context, R.layout.search_view, this)
     private val searchAction: ImageButton = hostView.findViewById(R.id.search_action)
     private val editSearch: EditText = hostView.findViewById(R.id.edit_search)
@@ -68,6 +68,10 @@ class PrettySearchView(paramContext: Context, private val attrs: AttributeSet) :
 
     fun setOnSearchListener(listener: OnSearchListener) {
         this.searchListener = listener
+    }
+
+    fun setHint(hint: String) {
+        editSearch.hint = hint
     }
 
     interface OnSearchListener {
