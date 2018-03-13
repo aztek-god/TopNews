@@ -172,7 +172,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onResume() {
         super.onResume()
         // todo sort out it
-        vm.requestData()
+//        vm.requestData()
     }
 
     override fun onPause() {
