@@ -9,4 +9,6 @@
     tools:context="dv.serg.topnews.ui.activity.NavigationActivity"
     tools:showIn="@layout/app_bar_navigation">
 
+    <!--<include layout="@layout/no_internet_connection_layout" />-->
+
 </android.support.constraint.ConstraintLayout>

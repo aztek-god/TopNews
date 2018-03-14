@@ -48,4 +48,7 @@
     <string name="action_mode_selected_sources">Sources selected</string>
     <string name="toast_button_exit_message">Please press button again to exit</string>
     <string name="search_view_hint">Search</string>
+    <string name="net_not_available">No internet connections found. Check your connection or try again</string>
+    <string name="net_alert_message">Whoops!</string>
+    <string name="net_internet_not_available_button_name">Retry</string>
 </resources>

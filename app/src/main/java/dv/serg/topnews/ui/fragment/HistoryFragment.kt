@@ -51,7 +51,7 @@ class HistoryFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         activity?.actionBar?.setDisplayHomeAsUpEnabled(true)
-        return inflater.inflate(R.layout.simple_list_layout, container, false)
+        return inflater.inflate(R.layout.list_state_layout, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

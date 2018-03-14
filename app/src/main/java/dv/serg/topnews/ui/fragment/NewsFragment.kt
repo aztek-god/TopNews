@@ -10,7 +10,6 @@ import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.view.*
-import dv.serg.lib.android.context.v4.toastShort
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
@@ -22,6 +21,7 @@ import dv.serg.topnews.ui.viewmodel.NewsViewModel
 import dv.serg.topnews.util.Outcome
 import dv.serg.topnews.util.SwitchActivity
 import dv.serg.topnews.util.update
+import kotlinx.android.synthetic.main.list_state_layout.*
 import kotlinx.android.synthetic.main.simple_list_layout.*
 import javax.inject.Inject
 
@@ -73,13 +73,15 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
             })
+
+            vm.requestData()
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        return inflater.inflate(R.layout.simple_list_layout, container, false)
+        return inflater.inflate(R.layout.list_state_layout, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -101,7 +103,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                 Observer {
                     when (it) {
                         is Outcome.Success -> {
-                            logd("Outcome.Success is loaded. it = ${it}")
+                            showListLayout()
                             if (it.type == Outcome.Type.UPDATABLE) {
                                 vm.standardAdapter.update(it.data)
                             } else if (it.type == Outcome.Type.APPENDABLE) {
@@ -119,12 +121,32 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                             }
                         }
                         is Outcome.Failure -> {
-                            logd("Outcome.Failure. it = ${it}")
-                            toastShort(it.toString())
+                            logd("Outcome.Failure = $it")
+                            showErrorLayout()
+
+//                            when {
+//                                it is UnknownHostException -> {
+//                                    logd("Outcome.Failure:UnknownHostException = $it")
+//                                    showErrorLayout()
+//                                }
+//                            }
                         }
                     }
                 }
         )
+
+        // todo
+//        vm.requestData()
+    }
+
+    private fun showErrorLayout() {
+        layout_error.visibility = View.VISIBLE
+        layout_list.visibility = View.GONE
+    }
+
+    private fun showListLayout() {
+        layout_error.visibility = View.GONE
+        layout_list.visibility = View.VISIBLE
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -151,7 +173,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == SearchActivity.SEARCH_QUERY_CODE) {
                 val searchQuery = data?.getStringExtra(SearchActivity.SEARCH_QUERY)
@@ -168,18 +189,18 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
 
-    override fun onResume() {
-        super.onResume()
-        // todo sort out it
-//        vm.requestData()
-    }
+//    override fun onResume() {
+//        super.onResume()
+//        // todo sort out it
+////        vm.requestData()
+//    }
 
-    override fun onPause() {
-        super.onPause()
-
-        // todo implement subscribe/unsubscribe logic
-//        vm.unsubscribe()
-    }
+//    override fun onPause() {
+//        super.onPause()
+//
+//        // todo implement subscribe/unsubscribe logic
+////        vm.unsubscribe()
+//    }
 
     override fun onRefresh() {
         vm.requestData()
