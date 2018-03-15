@@ -1,4 +1,4 @@
-package dv.serg.topnews.current
+package dv.serg.topnews.ui.holder
 
 import android.support.v7.widget.RecyclerView
 import android.view.View
@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.topnews.R
+import dv.serg.topnews.model.SubSource
 
 
 class SubSourceViewHolder(private val view: View, private val clickListener: () -> Unit) : RecyclerView.ViewHolder(view),

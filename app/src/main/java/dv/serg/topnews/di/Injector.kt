@@ -1,13 +1,13 @@
 package dv.serg.topnews.di
 
 import dv.serg.topnews.app.AppContext
-import dv.serg.topnews.current.DaggerSubSourceComponent
-import dv.serg.topnews.current.SubSourceActivity
 import dv.serg.topnews.di.component.AppComponent
 import dv.serg.topnews.di.component.DaggerAppComponent
 import dv.serg.topnews.di.component.DaggerFragmentComponent
+import dv.serg.topnews.di.component.DaggerSubSourceComponent
 import dv.serg.topnews.di.module.AppModule
 import dv.serg.topnews.di.module.FragmentModule
+import dv.serg.topnews.ui.activity.SubSourceActivity
 import dv.serg.topnews.ui.fragment.*
 
 

@@ -1,9 +1,12 @@
-package dv.serg.topnews.current
+package dv.serg.topnews.ui.viewmodel
 
 import android.arch.lifecycle.ViewModel
 import android.support.v7.view.ActionMode
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.logd
+import dv.serg.topnews.model.SubSource
+import dv.serg.topnews.model.getResources
+import dv.serg.topnews.ui.holder.SubSourceViewHolder
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers

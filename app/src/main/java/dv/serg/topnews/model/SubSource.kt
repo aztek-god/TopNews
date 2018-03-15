@@ -1,4 +1,4 @@
-package dv.serg.topnews.current
+package dv.serg.topnews.model
 
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity

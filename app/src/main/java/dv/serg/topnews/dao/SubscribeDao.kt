@@ -1,11 +1,11 @@
-package dv.serg.topnews.di.dao
+package dv.serg.topnews.dao
 
 import dv.serg.topnews.app.AppDatabase
-import dv.serg.topnews.current.SubSource
-import dv.serg.topnews.current.SubSourceViewModel
+import dv.serg.topnews.model.SubSource
+import dv.serg.topnews.ui.viewmodel.SubSourceViewModel
 import io.reactivex.Flowable
 
-class SubscibeDao(private val appDatabase: AppDatabase) : SubSourceViewModel.Contract.Repository {
+class SubscribeDao(private val appDatabase: AppDatabase) : SubSourceViewModel.Contract.Repository {
     override fun getAll(): Flowable<List<SubSource>> {
         return appDatabase.newsResourceDao().getAll()
     }

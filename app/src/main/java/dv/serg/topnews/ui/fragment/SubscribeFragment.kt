@@ -12,10 +12,10 @@ import android.view.*
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
-import dv.serg.topnews.current.SubSourceActivity
-import dv.serg.topnews.current.SubSourceViewHolder
-import dv.serg.topnews.current.SubSourceViewModel
 import dv.serg.topnews.di.Injector
+import dv.serg.topnews.ui.activity.SubSourceActivity
+import dv.serg.topnews.ui.holder.SubSourceViewHolder
+import dv.serg.topnews.ui.viewmodel.SubSourceViewModel
 import kotlinx.android.synthetic.main.simple_list_layout.*
 import javax.inject.Inject
 

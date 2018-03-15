@@ -5,11 +5,12 @@ import android.arch.lifecycle.ViewModel
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.app.performOnIoThread
-import dv.serg.topnews.current.SubSourceViewModel
+import dv.serg.topnews.dao.ArticleContract
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.model.Response
 import dv.serg.topnews.ui.holder.NewsViewHolder
 import dv.serg.topnews.util.Outcome
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import retrofit2.Retrofit
@@ -17,7 +18,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 import kotlin.properties.Delegates
 
-class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: SubSourceViewModel.Contract.Repository) : ViewModel() {
+class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: SubSourceViewModel.Contract.Repository, private val articleRepo: ArticleContract.ArticleDao) : ViewModel() {
 
     private interface NewsService {
         @GET("everything")
@@ -39,6 +40,8 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
     private var sources: String? = null
 
     var isLoading = false
+
+    val filterList: MutableList<Article> = ArrayList()
 
     private fun getResponse(query: String = "", currentPage: Int = 1): Flowable<Response> {
         return if (query.isEmpty()) {
@@ -94,6 +97,10 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
             .flatMap {
                 Flowable.just(it.articles)
             }
+            .flatMap {
+                val filteredList: List<Article> = it.minus(filterList)
+                Flowable.just(filteredList)
+            }
 
 
     fun requestData(loadMode: LoadMode = LoadMode.UPDATE) {
@@ -107,6 +114,13 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
         } else {
             loadData(loadMode)
         }
+    }
+
+    fun saveAsBookmark(article: Article) {
+        Completable.fromAction {
+            article.type = Article.Type.BOOKMARK
+            articleRepo.insert(article)
+        }.performOnIoThread<Unit>().subscribe()
     }
 
     private fun loadData(loadMode: LoadMode = LoadMode.UPDATE) {

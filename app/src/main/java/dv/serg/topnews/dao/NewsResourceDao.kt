@@ -1,10 +1,10 @@
-package dv.serg.topnews.repository
+package dv.serg.topnews.dao
 
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Insert
 import android.arch.persistence.room.OnConflictStrategy
 import android.arch.persistence.room.Query
-import dv.serg.topnews.current.SubSource
+import dv.serg.topnews.model.SubSource
 import io.reactivex.Flowable
 
 @Dao

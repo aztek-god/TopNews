@@ -52,4 +52,10 @@
     <string name="net_alert_message">Whoops!</string>
     <string name="net_internet_not_available_button_name">Retry</string>
     <string name="network_error">Network error.</string>
+    <string name="intent_chooser">Select browser</string>
+    <string name="copy_url">Copy url</string>
+    <string name="visit_site">Visit site</string>
+    <string name="copy_image_url">Copy image url</string>
+    <string name="add_to_filter">Add to filter</string>
+    <string name="add_to_bookmarks">Add to bookmarks</string>
 </resources>

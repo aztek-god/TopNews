@@ -25,7 +25,7 @@
         </activity>
         <activity android:name=".ui.activity.SearchActivity" />
         <activity
-            android:name=".current.SubSourceActivity"
+            android:name=".ui.activity.SubSourceActivity"
             android:label="@string/title_activity_subscribe"
             android:theme="@style/AppTheme.NoActionBar">
             <!--<intent-filter>-->

@@ -1,4 +1,4 @@
-package dv.serg.topnews.current
+package dv.serg.topnews.ui.activity
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity

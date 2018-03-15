@@ -17,9 +17,9 @@ import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.PaginationScrollListener
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
-import dv.serg.topnews.current.SubSourceActivity
 import dv.serg.topnews.di.Injector
 import dv.serg.topnews.ui.activity.SearchActivity
+import dv.serg.topnews.ui.activity.SubSourceActivity
 import dv.serg.topnews.ui.holder.NewsViewHolder
 import dv.serg.topnews.ui.viewmodel.NewsViewModel
 import dv.serg.topnews.util.Outcome
@@ -45,6 +45,8 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var ownerActivity: LifecycleOwner? = null
 
+    private var pActivity: AppCompatActivity? = null
+
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if (context is SearchQueryObservable) {
@@ -56,12 +58,14 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         ownerActivity = context as AppCompatActivity
+        pActivity = context as AppCompatActivity
     }
 
     override fun onDetach() {
         super.onDetach()
         queryListener = null
         ownerActivity = null
+        pActivity = null
 //        vm.standardAdapter = null
     }
 
@@ -91,10 +95,18 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                         is NewsViewHolder.LoadImageException -> {
                         }
                     }
+                }.apply {
+                    //                    fm = childFragmentManager
+                    fm = pActivity?.supportFragmentManager
+                    addToFilterAction = { item ->
+                        vm.filterList.add(item)
+                    }
+                    addToBookmarkAction = { item ->
+                        vm.saveAsBookmark(item)
+                    }
                 }
             })
         }
-
 
         fr_recycler.adapter = vm.standardAdapter
 
@@ -169,6 +181,11 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
             logd("vm.requestData:size = ${vm.standardAdapter!!.size}")
             showData()
         }
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+//        vm.standardAdapter!!.
     }
 
     private fun showData() {
