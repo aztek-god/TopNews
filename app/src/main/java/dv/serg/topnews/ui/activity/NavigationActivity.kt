@@ -3,7 +3,6 @@ package dv.serg.topnews.ui.activity
 import android.os.Bundle
 import android.support.annotation.IdRes
 import android.support.design.widget.NavigationView
-import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
@@ -11,8 +10,6 @@ import android.view.View
 import dv.serg.lib.android.context.toastShort
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
-import dv.serg.topnews.ui.fragment.BookmarkFragment
-import dv.serg.topnews.ui.fragment.HistoryFragment
 import dv.serg.topnews.ui.fragment.HotNewsFragment
 import dv.serg.topnews.ui.fragment.NewsFragment
 import dv.serg.topnews.util.SwitchActivity
@@ -92,40 +89,40 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
 
 
     private fun handleFragment(@IdRes menuItemRes: Int) {
-
-        logd("${hashCode()} handleFragment{menuItemRes = $menuItemRes}")
-        when (menuItemRes) {
-            R.id.hot_news_item -> {
-                val tag = HotNewsFragment::class.java.name
-                var fr: Fragment? = supportFragmentManager.findFragmentByTag(tag)
-                if (fr == null) {
-                    fr = HotNewsFragment()
-                    supportFragmentManager.beginTransaction().add(R.id.fr_holder, fr, tag).commit()
-                } else {
-                    supportFragmentManager.beginTransaction().show(supportFragmentManager.findFragmentByTag(tag)).commit()
-                }
-                hideFragmentsExceptFor(tag)
-            }
-            R.id.news_item -> {
-                val tag = NewsFragment::class.java.name
-                var fr: Fragment? = supportFragmentManager.findFragmentByTag(tag)
-                if (fr == null) {
-                    fr = NewsFragment()
-                    supportFragmentManager.beginTransaction().add(R.id.fr_holder, fr, tag).commit()
-                } else {
-                    supportFragmentManager.beginTransaction().show(supportFragmentManager.findFragmentByTag(tag)).commit()
-                }
-                hideFragmentsExceptFor(tag)
-            }
-            R.id.history_item -> {
-                hideFragmentsExceptFor("")
-                supportFragmentManager.beginTransaction().add(R.id.fr_holder, HistoryFragment.newInstance()).commit()
-            }
-            R.id.bookmark_item -> {
-                hideFragmentsExceptFor("")
-                supportFragmentManager.beginTransaction().add(R.id.fr_holder, BookmarkFragment.newInstance()).commit()
-            }
-        }
+        supportFragmentManager.beginTransaction().replace(R.id.fr_holder, NewsFragment()).commit()
+//        logd("${hashCode()} handleFragment{menuItemRes = $menuItemRes}")
+//        when (menuItemRes) {
+//            R.id.hot_news_item -> {
+//                val tag = HotNewsFragment::class.java.name
+//                var fr: Fragment? = supportFragmentManager.findFragmentByTag(tag)
+//                if (fr == null) {
+//                    fr = HotNewsFragment()
+//                    supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr, tag).commit()
+//                } else {
+//                    supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr, tag).commit()
+//                }
+////                hideFragmentsExceptFor(tag)
+//            }
+//            R.id.news_item -> {
+//                val tag = NewsFragment::class.java.name
+//                var fr: Fragment? = supportFragmentManager.findFragmentByTag(tag)
+//                if (fr == null) {
+//                    fr = NewsFragment()
+//                    supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr, tag).commit()
+//                } else {
+//                    supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr, tag).commit()
+//                }
+////                hideFragmentsExceptFor(tag)
+//            }
+//            R.id.history_item -> {
+//                hideFragmentsExceptFor("")
+//                supportFragmentManager.beginTransaction().add(R.id.fr_holder, HistoryFragment.newInstance()).commit()
+//            }
+//            R.id.bookmark_item -> {
+//                hideFragmentsExceptFor("")
+//                supportFragmentManager.beginTransaction().add(R.id.fr_holder, BookmarkFragment.newInstance()).commit()
+//            }
+//        }
 
 
         logd("supportFragmentManager.fragments = ${supportFragmentManager.fragments}")

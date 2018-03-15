@@ -1,6 +1,7 @@
 package dv.serg.topnews.ui.fragment
 
 import android.app.Activity
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
@@ -8,9 +9,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.*
+import dv.serg.lib.android.context.v4.toastShort
 import dv.serg.lib.collection.StandardAdapter
+import dv.serg.lib.utils.PaginationScrollListener
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
 import dv.serg.topnews.current.SubSourceActivity
@@ -22,6 +26,7 @@ import dv.serg.topnews.util.Outcome
 import dv.serg.topnews.util.SwitchActivity
 import dv.serg.topnews.util.update
 import kotlinx.android.synthetic.main.list_state_layout.*
+import kotlinx.android.synthetic.main.no_internet_connection_layout.*
 import kotlinx.android.synthetic.main.simple_list_layout.*
 import javax.inject.Inject
 
@@ -38,6 +43,8 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         ViewModelProviders.of(this, viewModelFactory).get(NewsViewModel::class.java)
     }
 
+    private var ownerActivity: LifecycleOwner? = null
+
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if (context is SearchQueryObservable) {
@@ -47,11 +54,15 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         if (context is SwitchActivity) {
             switchActivity = context
         }
+
+        ownerActivity = context as AppCompatActivity
     }
 
     override fun onDetach() {
         super.onDetach()
         queryListener = null
+        ownerActivity = null
+//        vm.standardAdapter = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,24 +70,8 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
-
-        if (savedInstanceState == null) {
-            vm.standardAdapter = StandardAdapter(R.layout.news_item_layout, { view: View ->
-                NewsViewHolder(view) {
-                    when (it) {
-                        is NewsViewHolder.OpenBrowserException -> {
-                            TODO()
-                        }
-                        is NewsViewHolder.LoadImageException -> {
-                            TODO()
-                        }
-                    }
-                }
-            })
-
-            vm.requestData()
-        }
     }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -87,8 +82,22 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (vm.standardAdapter == null) {
+            vm.standardAdapter = StandardAdapter(R.layout.news_item_layout, { v: View ->
+                NewsViewHolder(v) {
+                    when (it) {
+                        is NewsViewHolder.OpenBrowserException -> {
+                        }
+                        is NewsViewHolder.LoadImageException -> {
+                        }
+                    }
+                }
+            })
+        }
+
 
         fr_recycler.adapter = vm.standardAdapter
+
         fr_recycler.apply {
             layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         }
@@ -97,6 +106,37 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
             setOnRefreshListener(this@NewsFragment)
         }
 
+        retry.setOnClickListener {
+            vm.requestData()
+        }
+
+        fr_recycler.addOnScrollListener(
+                object : PaginationScrollListener(fr_recycler.layoutManager as LinearLayoutManager) {
+                    override fun getTotalPageCount(): Int = vm.standardAdapter?.size ?: 0
+
+                    override fun isLastPage(): Boolean {
+                        return false
+                    }
+
+                    override fun isLoading(): Boolean {
+                        return vm.isLoading
+                    }
+
+                    override fun loadMoreItems() {
+                        vm.currentPage += 1
+                        vm.requestData(NewsViewModel.LoadMode.APPEND)
+                    }
+                }
+        )
+    }
+
+    private fun resetPagination() {
+        vm.currentPage = 1
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
 
         vm.liveNewsResult.observe(
                 this,
@@ -104,39 +144,36 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                     when (it) {
                         is Outcome.Success -> {
                             showListLayout()
-                            if (it.type == Outcome.Type.UPDATABLE) {
-                                vm.standardAdapter.update(it.data)
-                            } else if (it.type == Outcome.Type.APPENDABLE) {
-                                vm.standardAdapter.addAll(it.data)
+                            if (vm.loadMode == NewsViewModel.LoadMode.UPDATE) {
+                                vm.standardAdapter?.update(it.data)
+                            } else {
+                                vm.standardAdapter?.addAll(it.data)
                             }
-
-                            swipe_ref.isRefreshing = false
                         }
                         is Outcome.Progress -> {
-                            if (it.isLoading) {
-                                if (it.type == Outcome.Type.UPDATABLE) {
-//                                    swipe_news_ref.setProgressViewOffset(true, 0, 800)
-//                                    swipe_news_ref.showAtBottomMode(true)
-                                }
-                            }
+                            swipe_ref.isRefreshing = it.isLoading
                         }
                         is Outcome.Failure -> {
-                            logd("Outcome.Failure = $it")
                             showErrorLayout()
-
-//                            when {
-//                                it is UnknownHostException -> {
-//                                    logd("Outcome.Failure:UnknownHostException = $it")
-//                                    showErrorLayout()
-//                                }
-//                            }
+                            toastShort(getString(R.string.network_error))
                         }
                     }
                 }
         )
 
-        // todo
-//        vm.requestData()
+        if (!vm.isFirstLaunched) {
+            logd("vm.isFirstLaunched")
+            vm.isFirstLaunched = true
+            vm.requestData()
+        } else {
+            logd("vm.requestData:size = ${vm.standardAdapter!!.size}")
+            showData()
+        }
+    }
+
+    private fun showData() {
+        showListLayout()
+        fr_recycler.adapter = vm.standardAdapter
     }
 
     private fun showErrorLayout() {
@@ -158,12 +195,18 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
             R.id.action_search -> {
                 startActivityForResult(Intent(activity, SearchActivity::class.java), SearchActivity.SEARCH_QUERY_CODE)
                 activity?.overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
+
+                resetPagination()
                 true
                 // todo implement refresh button here
             }
             R.id.action_subscription -> {
                 startActivityForResult(Intent(activity, SubSourceActivity::class.java), SubSourceActivity.SUBSCRIPTION_RESULT_CODE)
                 activity?.overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
+                true
+            }
+            R.id.action_refresh -> {
+                vm.requestData()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -188,21 +231,8 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-
-//    override fun onResume() {
-//        super.onResume()
-//        // todo sort out it
-////        vm.requestData()
-//    }
-
-//    override fun onPause() {
-//        super.onPause()
-//
-//        // todo implement subscribe/unsubscribe logic
-////        vm.unsubscribe()
-//    }
-
     override fun onRefresh() {
+        resetPagination()
         vm.requestData()
     }
 

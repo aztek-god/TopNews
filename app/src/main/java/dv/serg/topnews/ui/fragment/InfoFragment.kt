@@ -1,8 +1,10 @@
 package dv.serg.topnews.ui.fragment
 
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
@@ -38,6 +40,18 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     @Inject
     lateinit var retrofitViewModelFactory: ViewModelProvider.Factory
+
+    private var parentOwner: LifecycleOwner? = null
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        parentOwner = context as LifecycleOwner
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        parentOwner = null
+    }
 
     private val propertyObserver: ObservableProperty<Constants.RequestState> = ObservableProperty(Constants.RequestState.IDLE).also { it ->
         it.registerAsObserver(object : ObservableProperty.PropertyObserver<Constants.RequestState> {
@@ -108,7 +122,7 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
         fr_recycler.adapter = vm.standardAdapter
 
-        vm.liveNewsResult.observe(this,
+        vm.liveNewsResult.observe(parentOwner!!,
                 Observer { it: List<Article>? ->
                     vm.standardAdapter.addAll(it ?: emptyList())
                 }

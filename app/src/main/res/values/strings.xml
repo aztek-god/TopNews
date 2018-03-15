@@ -51,4 +51,5 @@
     <string name="net_not_available">No internet connections found. Check your connection or try again</string>
     <string name="net_alert_message">Whoops!</string>
     <string name="net_internet_not_available_button_name">Retry</string>
+    <string name="network_error">Network error.</string>
 </resources>
