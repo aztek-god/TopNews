@@ -14,7 +14,6 @@ import android.view.View
 import dv.serg.lib.android.context.toastShort
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
-import dv.serg.topnews.ui.ConfigurationAwareComponent
 import dv.serg.topnews.ui.fragment.NewsFragment
 import dv.serg.topnews.util.SwitchActivity
 import io.reactivex.Observable
@@ -66,56 +65,6 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
 
         logd(vm.currentFragment.toString())
     }
-
-//    public void onSaveInstanceState(Bundle outState){
-//        getFragmentManager().putFragment(outState,"myfragment",myfragment);
-//    }
-//    public void onRetoreInstanceState(Bundle inState){
-//        myFragment = getFragmentManager().getFragment(inState,"myfragment");
-//    }
-
-    override fun onSaveInstanceState(outState: Bundle?) {
-        super.onSaveInstanceState(outState)
-//        val fragment: Fragment? = supportFragmentManager.findFragmentByTag(mCurrentFragmentTag)
-
-        vm.currentFragment
-
-        vm.currentFragment?.let {
-            if (it is ConfigurationAwareComponent) {
-                it.onSaveConfigChange()
-            }
-        }
-
-        logd("serg.dv onSaveInstanceState:fragment = ${vm.currentFragment}")
-
-//        supportFragmentManager.putFragment(outState, mCurrentFragmentTag, fragment)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        super.onRestoreInstanceState(savedInstanceState)
-        val fragment: Fragment? = vm.currentFragment
-
-        logd("serg.dv onRestoreInstanceState:fragment = $fragment")
-
-        fragment?.let {
-            if (it is ConfigurationAwareComponent) {
-                it.onRestoreConfigChange()
-            }
-        }
-    }
-
-//    override fun onResume() {
-//        super.onPostResume()
-//        val fragment: Fragment? = supportFragmentManager.findFragmentByTag(mCurrentFragmentTag)
-//        logd("onRestoreInstanceState:fragment = $fragment")
-//
-//
-//        fragment?.let {
-//            if (it is ConfigurationAwareComponent) {
-//                it.onRestoreConfigChange()
-//            }
-//        }
-//    }
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {

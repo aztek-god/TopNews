@@ -16,10 +16,9 @@ import android.view.*
 import dv.serg.lib.android.context.v4.toastShort
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.PaginationScrollListener
-import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
 import dv.serg.topnews.di.Injector
-import dv.serg.topnews.ui.ConfigurationAwareComponent
+import dv.serg.topnews.model.Article
 import dv.serg.topnews.ui.activity.NavigationActivity
 import dv.serg.topnews.ui.activity.SearchActivity
 import dv.serg.topnews.ui.activity.SubSourceActivity
@@ -38,7 +37,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
-class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, ConfigurationAwareComponent {
+class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
@@ -57,6 +56,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, Co
 
     private var fab: FloatingActionButton? = null
 
+    private lateinit var mAdapter: StandardAdapter<Article, NewsViewHolder>
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -94,7 +94,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, Co
         setHasOptionsMenu(true)
     }
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -105,8 +104,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, Co
         super.onViewCreated(view, savedInstanceState)
 
 
-//        if (vm.standardAdapter == null) {
-        vm.standardAdapter = StandardAdapter(R.layout.news_item_layout, { v: View ->
+        mAdapter = StandardAdapter(R.layout.news_item_layout, { v: View ->
             NewsViewHolder(v) {
                 when (it) {
                     is NewsViewHolder.OpenBrowserException -> {
@@ -116,28 +114,50 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, Co
                 }
             }.apply {
                 fm = childFragmentManager
-//                    fm = pActivity?.supportFragmentManager
+            }.apply {
                 addToFilterAction = { item ->
                     vm.filterList.add(item)
                 }
+            }.apply {
                 addToBookmarkAction = { item ->
                     vm.saveAsBookmark(item)
                 }
+            }.apply {
                 shortClickListener = {
                     if (it.url == null) {
                         Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe { toastShort("Page temporarily unavailable.") }
                     } else {
                         openBrowser(context!!, it.url!!)
+                        vm.saveAsHistory(it)
                     }
                 }
             }
-        })
-//        }
+        }).also {
+            fr_recycler.apply {
+                adapter = it
+            }.apply {
+                layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+            }.apply {
+                addOnScrollListener(
+                        object : PaginationScrollListener(fr_recycler.layoutManager as LinearLayoutManager) {
+                            override fun getTotalPageCount(): Int = mAdapter.size
 
-        fr_recycler.adapter = vm.standardAdapter
+                            override fun isLastPage(): Boolean {
+                                return false
+                            }
 
-        fr_recycler.apply {
-            layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+                            override fun isLoading(): Boolean {
+                                return vm.isLoading
+                            }
+
+                            override fun loadMoreItems() {
+                                vm.currentPage += 1
+                                vm.requestData(NewsViewModel.LoadMode.APPEND)
+                            }
+                        }
+
+                )
+            }
         }
 
         swipe_ref.apply {
@@ -148,32 +168,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, Co
             vm.requestData()
         }
 
-        fr_recycler.addOnScrollListener(
-                object : PaginationScrollListener(fr_recycler.layoutManager as LinearLayoutManager) {
-                    override fun getTotalPageCount(): Int = vm.standardAdapter?.size ?: 0
-
-                    override fun isLastPage(): Boolean {
-                        return false
-                    }
-
-                    override fun isLoading(): Boolean {
-                        return vm.isLoading
-                    }
-
-                    override fun loadMoreItems() {
-                        vm.currentPage += 1
-                        vm.requestData(NewsViewModel.LoadMode.APPEND)
-                    }
-                }
-        )
-
-        fab?.hide()
-
-        fab?.setOnClickListener {
-            vm.mQuery = ""
-            vm.requestData()
-            fab?.hide()
-        }
     }
 
     private fun resetPagination() {
@@ -183,10 +177,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, Co
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        if (pContext is NavigationActivity) {
-            pActivity = pContext as NavigationActivity
-//            pActivity.fab
-        }
 
         vm.liveNewsResult.observe(
                 this,
@@ -195,9 +185,9 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, Co
                         is Outcome.Success -> {
                             showListLayout()
                             if (vm.loadMode == NewsViewModel.LoadMode.UPDATE) {
-                                vm.standardAdapter?.update(it.data)
+                                mAdapter.update(it.data)
                             } else {
-                                vm.standardAdapter?.addAll(it.data)
+                                mAdapter.addAll(it.data)
                             }
                         }
                         is Outcome.Progress -> {
@@ -223,6 +213,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, Co
             vm.isFirstLaunched = true
             vm.requestData()
         } else {
+            mAdapter.update(vm.restoreData)
             showData()
         }
     }
@@ -230,7 +221,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, Co
 
     private fun showData() {
         showListLayout()
-        fr_recycler.adapter = vm.standardAdapter
+        fr_recycler.adapter = mAdapter
     }
 
     private fun showErrorLayout() {
@@ -267,15 +258,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, Co
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onSaveConfigChange() {
-        logd("serg.dv onSaveConfigChange")
-    }
-
-    override fun onRestoreConfigChange() {
-        logd("serg.dv onRestoreConfigChange")
-        vm.standardAdapter?.update(vm.restoreData)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

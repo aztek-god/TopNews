@@ -29,16 +29,11 @@ class NewsViewHolder(private val view: View, private val throwableHandler: (Thro
     private val content: TextView = view.findViewById(R.id.content)
     private val datetime: TextView = view.findViewById(R.id.datetime)
     private val header: TextView = view.findViewById(R.id.header)
-
     private val thumb: ImageView = view.findViewById(R.id.thumb)
-
-//    private val button: Button = view.findViewById(R.id.button123)
-
     private val bottomMenu = BottomMenuSheetDialog()
 
     var addToFilterAction: (item: Article) -> Unit = {}
     var addToBookmarkAction: (item: Article) -> Unit = {}
-
     var shortClickListener: (item: Article) -> Unit = {}
 
     var fm: FragmentManager? = null
@@ -52,11 +47,8 @@ class NewsViewHolder(private val view: View, private val throwableHandler: (Thro
                     ?: "", Constants.Time.DEFAULT_DATETIME_PATTERN)
             header.text = item.title
 
-            // todo place error messages to strings.xml for internationalization purpose
             thumb.load(item.urlToImage
                     ?: throw LoadImageException("Unable to load image as placeholder with invalid url. The url's value is ${item.urlToImage}"))
-
-
 
             bottomMenu.apply {
                 setOnItem1ClickListener {

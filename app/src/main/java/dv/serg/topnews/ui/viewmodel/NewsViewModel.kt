@@ -2,13 +2,11 @@ package dv.serg.topnews.ui.viewmodel
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.app.performOnIoThread
 import dv.serg.topnews.dao.ArticleContract
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.model.Response
-import dv.serg.topnews.ui.holder.NewsViewHolder
 import dv.serg.topnews.util.Outcome
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -36,7 +34,7 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
     val liveNewsResult: MutableLiveData<Outcome<List<Article>>> = MutableLiveData()
 
 
-    var standardAdapter: StandardAdapter<Article, NewsViewHolder>? = null
+//    var standardAdapter: StandardAdapter<Article, NewsViewHolder>? = null
 
     private var sources: String? = null
 
@@ -127,6 +125,15 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
             articleRepo.insert(article)
         }.performOnIoThread<Unit>().subscribe()
     }
+
+
+    fun saveAsHistory(article: Article) {
+        Completable.fromAction {
+            article.type = Article.Type.HISTORY
+            articleRepo.insert(article)
+        }.performOnIoThread<Unit>().subscribe()
+    }
+
 
     private var savedDataOnRotationChange: List<Article> = ArrayList()
     val restoreData: List<Article> get() = savedDataOnRotationChange
