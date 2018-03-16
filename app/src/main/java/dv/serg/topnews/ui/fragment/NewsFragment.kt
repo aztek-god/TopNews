@@ -24,10 +24,14 @@ import dv.serg.topnews.ui.holder.NewsViewHolder
 import dv.serg.topnews.ui.viewmodel.NewsViewModel
 import dv.serg.topnews.util.Outcome
 import dv.serg.topnews.util.SwitchActivity
+import dv.serg.topnews.util.openBrowser
 import dv.serg.topnews.util.update
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.list_state_layout.*
 import kotlinx.android.synthetic.main.no_internet_connection_layout.*
 import kotlinx.android.synthetic.main.simple_list_layout.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
@@ -103,6 +107,13 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                     addToBookmarkAction = { item ->
                         vm.saveAsBookmark(item)
+                    }
+                    shortClickListener = {
+                        if (it.url == null) {
+                            Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe { toastShort("Page temporarily unavailable.") }
+                        } else {
+                            openBrowser(context!!, it.url!!)
+                        }
                     }
                 }
             })

@@ -87,10 +87,10 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
                     val entities = vm.subSourceAdapter?.filter { it.isSelected }
                     entities?.let {
                         vm.save(entities) {
-                            vm.run {
-                                subSourceAdapter?.forEach { it.isSelected = false }
-                                subSourceAdapter?.notifyDataSetChanged()
-                            }
+                            //                            vm.run {
+//                                subSourceAdapter?.forEach { it.isSelected = false }
+//                                subSourceAdapter?.notifyDataSetChanged()
+//                            }
 
                             activity?.setResult(SubSourceActivity.SUBSCRIPTION_RESULT_CODE)
                             activity?.finish()

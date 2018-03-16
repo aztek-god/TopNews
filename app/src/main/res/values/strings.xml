@@ -58,4 +58,6 @@
     <string name="copy_image_url">Copy image url</string>
     <string name="add_to_filter">Add to filter</string>
     <string name="add_to_bookmarks">Add to bookmarks</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
 </resources>

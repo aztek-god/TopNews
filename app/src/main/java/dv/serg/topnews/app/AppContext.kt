@@ -38,6 +38,7 @@ class AppContext : Application() {
         fun convertDatetimeFromString(datetimeString: String, pattern: String = Constants.Time.DEFAULT_DATETIME_PATTERN): Long {
             val sdf = SimpleDateFormat(pattern, Locale.ENGLISH)
             val date: Date = sdf.parse(datetimeString)
+
             return date.time
         }
 
