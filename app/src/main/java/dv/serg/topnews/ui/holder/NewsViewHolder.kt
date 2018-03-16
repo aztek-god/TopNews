@@ -6,16 +6,12 @@ import android.content.Context
 import android.support.v4.app.FragmentManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import dv.serg.lib.android.context.v4.toastShort
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.topnews.R
-import dv.serg.topnews.app.AppContext
-import dv.serg.topnews.app.Constants
 import dv.serg.topnews.app.load
-import dv.serg.topnews.app.openBrowser
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.ui.view.BottomMenuSheetDialog
 import dv.serg.topnews.util.openBrowser
@@ -34,7 +30,7 @@ class NewsViewHolder(private val view: View, private val throwableHandler: (Thro
 
     private val thumb: ImageView = view.findViewById(R.id.thumb)
 
-    private val button: Button = view.findViewById(R.id.button123)
+//    private val button: Button = view.findViewById(R.id.button123)
 
     private val bottomMenu = BottomMenuSheetDialog()
 
@@ -56,11 +52,11 @@ class NewsViewHolder(private val view: View, private val throwableHandler: (Thro
 
 //            Glide.with(context).load(item.url)
 
-            button.setOnClickListener {
-                context.openBrowser(item.url
-                        ?: throw OpenBrowserException("Unable to open browser with invalid url. The url's value is ${item.url}"),
-                        AppContext.getStringByName(Constants.Resources.CHOOSER_TITLE))
-            }
+//            button.setOnClickListener {
+//                context.openBrowser(item.url
+//                        ?: throw OpenBrowserException("Unable to open browser with invalid url. The url's value is ${item.url}"),
+//                        AppContext.getStringByName(Constants.Resources.CHOOSER_TITLE))
+//            }
 
             bottomMenu.apply {
                 setOnItem1ClickListener {

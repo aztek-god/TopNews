@@ -26,17 +26,4 @@
         layout="@layout/content_navigation"
         android:visibility="visible" />
 
-    <!--<include-->
-    <!--android:id="@+id/no_internet_error_layout"-->
-    <!--layout="@layout/no_internet_connection_layout"-->
-    <!--android:visibility="gone" />-->
-
-    <!--<android.support.design.widget.FloatingActionButton-->
-    <!--android:id="@+id/fab"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_gravity="bottom|end"-->
-    <!--android:layout_margin="@dimen/fab_margin"-->
-    <!--app:srcCompat="@android:drawable/ic_dialog_email" />-->
-
 </android.support.design.widget.CoordinatorLayout>

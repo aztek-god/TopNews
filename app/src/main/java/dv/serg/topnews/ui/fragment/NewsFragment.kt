@@ -66,7 +66,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         queryListener = null
         ownerActivity = null
         pActivity = null
-//        vm.standardAdapter = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,6 +84,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
 
         if (vm.standardAdapter == null) {
             vm.standardAdapter = StandardAdapter(R.layout.news_item_layout, { v: View ->
@@ -181,6 +181,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
             logd("vm.requestData:size = ${vm.standardAdapter!!.size}")
             showData()
         }
+
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
