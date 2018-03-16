@@ -1,9 +1,12 @@
 package dv.serg.topnews.ui.activity
 
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.annotation.IdRes
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
+import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
@@ -11,7 +14,7 @@ import android.view.View
 import dv.serg.lib.android.context.toastShort
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
-import dv.serg.topnews.ui.fragment.HotNewsFragment
+import dv.serg.topnews.ui.ConfigurationAwareComponent
 import dv.serg.topnews.ui.fragment.NewsFragment
 import dv.serg.topnews.util.SwitchActivity
 import io.reactivex.Observable
@@ -36,10 +39,16 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
 
     var fab: FloatingActionButton? = null
 
+    private var mCurrentFragmentTag: String? = null
+
+    private lateinit var vm: PersistFragment
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navigation)
         setSupportActionBar(toolbar)
+
+        vm = ViewModelProviders.of(this).get(PersistFragment::class.java)
 
         fab = news_fab
 
@@ -54,7 +63,59 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
             currentLayoutId = R.id.news_item
             handleFragment(currentLayoutId)
         }
+
+        logd(vm.currentFragment.toString())
     }
+
+//    public void onSaveInstanceState(Bundle outState){
+//        getFragmentManager().putFragment(outState,"myfragment",myfragment);
+//    }
+//    public void onRetoreInstanceState(Bundle inState){
+//        myFragment = getFragmentManager().getFragment(inState,"myfragment");
+//    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+//        val fragment: Fragment? = supportFragmentManager.findFragmentByTag(mCurrentFragmentTag)
+
+        vm.currentFragment
+
+        vm.currentFragment?.let {
+            if (it is ConfigurationAwareComponent) {
+                it.onSaveConfigChange()
+            }
+        }
+
+        logd("serg.dv onSaveInstanceState:fragment = ${vm.currentFragment}")
+
+//        supportFragmentManager.putFragment(outState, mCurrentFragmentTag, fragment)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val fragment: Fragment? = vm.currentFragment
+
+        logd("serg.dv onRestoreInstanceState:fragment = $fragment")
+
+        fragment?.let {
+            if (it is ConfigurationAwareComponent) {
+                it.onRestoreConfigChange()
+            }
+        }
+    }
+
+//    override fun onResume() {
+//        super.onPostResume()
+//        val fragment: Fragment? = supportFragmentManager.findFragmentByTag(mCurrentFragmentTag)
+//        logd("onRestoreInstanceState:fragment = $fragment")
+//
+//
+//        fragment?.let {
+//            if (it is ConfigurationAwareComponent) {
+//                it.onRestoreConfigChange()
+//            }
+//        }
+//    }
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
@@ -94,7 +155,14 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
 
 
     private fun handleFragment(@IdRes menuItemRes: Int) {
-        supportFragmentManager.beginTransaction().replace(R.id.fr_holder, NewsFragment()).commit()
+
+        // todo
+        mCurrentFragmentTag = NewsFragment.TAG
+
+        if (vm.currentFragment == null) {
+            vm.currentFragment = NewsFragment()
+        }
+        supportFragmentManager.beginTransaction().replace(R.id.fr_holder, vm.currentFragment, mCurrentFragmentTag).commit()
 //        logd("${hashCode()} handleFragment{menuItemRes = $menuItemRes}")
 //        when (menuItemRes) {
 //            R.id.hot_news_item -> {
@@ -133,14 +201,7 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
         logd("supportFragmentManager.fragments = ${supportFragmentManager.fragments}")
     }
 
-    private val tags: List<String> = listOf(HotNewsFragment::class.java.name, NewsFragment::class.java.name)
-
-    private fun hideFragmentsExceptFor(tag: String) {
-        tags.filter { it != tag }.forEach {
-            val tagFr = supportFragmentManager.findFragmentByTag(it)
-            if (tagFr != null) {
-                supportFragmentManager.beginTransaction().hide(tagFr).commit()
-            }
-        }
+    class PersistFragment : ViewModel() {
+        var currentFragment: Fragment? = null
     }
 }

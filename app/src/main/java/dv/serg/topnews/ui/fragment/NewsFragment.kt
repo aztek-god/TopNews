@@ -19,6 +19,7 @@ import dv.serg.lib.utils.PaginationScrollListener
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
 import dv.serg.topnews.di.Injector
+import dv.serg.topnews.ui.ConfigurationAwareComponent
 import dv.serg.topnews.ui.activity.NavigationActivity
 import dv.serg.topnews.ui.activity.SearchActivity
 import dv.serg.topnews.ui.activity.SubSourceActivity
@@ -37,8 +38,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
-class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
-
+class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener, ConfigurationAwareComponent {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
@@ -105,34 +105,34 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         super.onViewCreated(view, savedInstanceState)
 
 
-        if (vm.standardAdapter == null) {
-            vm.standardAdapter = StandardAdapter(R.layout.news_item_layout, { v: View ->
-                NewsViewHolder(v) {
-                    when (it) {
-                        is NewsViewHolder.OpenBrowserException -> {
-                        }
-                        is NewsViewHolder.LoadImageException -> {
-                        }
+//        if (vm.standardAdapter == null) {
+        vm.standardAdapter = StandardAdapter(R.layout.news_item_layout, { v: View ->
+            NewsViewHolder(v) {
+                when (it) {
+                    is NewsViewHolder.OpenBrowserException -> {
                     }
-                }.apply {
-                    //                    fm = childFragmentManager
-                    fm = pActivity?.supportFragmentManager
-                    addToFilterAction = { item ->
-                        vm.filterList.add(item)
-                    }
-                    addToBookmarkAction = { item ->
-                        vm.saveAsBookmark(item)
-                    }
-                    shortClickListener = {
-                        if (it.url == null) {
-                            Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe { toastShort("Page temporarily unavailable.") }
-                        } else {
-                            openBrowser(context!!, it.url!!)
-                        }
+                    is NewsViewHolder.LoadImageException -> {
                     }
                 }
-            })
-        }
+            }.apply {
+                fm = childFragmentManager
+//                    fm = pActivity?.supportFragmentManager
+                addToFilterAction = { item ->
+                    vm.filterList.add(item)
+                }
+                addToBookmarkAction = { item ->
+                    vm.saveAsBookmark(item)
+                }
+                shortClickListener = {
+                    if (it.url == null) {
+                        Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe { toastShort("Page temporarily unavailable.") }
+                    } else {
+                        openBrowser(context!!, it.url!!)
+                    }
+                }
+            }
+        })
+//        }
 
         fr_recycler.adapter = vm.standardAdapter
 
@@ -212,10 +212,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         )
 
         vm.isSearch.observe(this, Observer {
-            logd("vm.isSearch.observe.value = ${vm.isSearch.value}")
-            logd("vm.isSearch.observe.value.fab = ${fab}")
-
-
             if (vm.isSearch.value == true) {
                 pActivity?.fab?.show()
             } else {
@@ -224,18 +220,13 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         })
 
         if (!vm.isFirstLaunched) {
-            logd("vm.isFirstLaunched")
             vm.isFirstLaunched = true
             vm.requestData()
         } else {
-            logd("vm.requestData:size = ${vm.standardAdapter!!.size}")
             showData()
         }
     }
 
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-    }
 
     private fun showData() {
         showListLayout()
@@ -278,6 +269,15 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
+    override fun onSaveConfigChange() {
+        logd("serg.dv onSaveConfigChange")
+    }
+
+    override fun onRestoreConfigChange() {
+        logd("serg.dv onRestoreConfigChange")
+        vm.standardAdapter?.update(vm.restoreData)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -308,6 +308,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     companion object {
         private const val QUERY = "mQuery"
+        const val TAG = "NewsFragment"
 
         fun newInstance(query: String = ""): NewsFragment {
             val instance = NewsFragment()

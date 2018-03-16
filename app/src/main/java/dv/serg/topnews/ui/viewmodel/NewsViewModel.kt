@@ -128,11 +128,15 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
         }.performOnIoThread<Unit>().subscribe()
     }
 
+    private var savedDataOnRotationChange: List<Article> = ArrayList()
+    val restoreData: List<Article> get() = savedDataOnRotationChange
+
     private fun loadData(loadMode: LoadMode = LoadMode.UPDATE) {
         compositeDisposable.add(
                 getRequestData(loadMode)
                         .subscribe(
                                 {
+                                    savedDataOnRotationChange = it ?: emptyList()
                                     liveNewsResult.value = Outcome.success(it
                                             ?: emptyList())
                                 },
