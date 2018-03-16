@@ -8,6 +8,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.FloatingActionButton
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -18,6 +19,7 @@ import dv.serg.lib.utils.PaginationScrollListener
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
 import dv.serg.topnews.di.Injector
+import dv.serg.topnews.ui.activity.NavigationActivity
 import dv.serg.topnews.ui.activity.SearchActivity
 import dv.serg.topnews.ui.activity.SubSourceActivity
 import dv.serg.topnews.ui.holder.NewsViewHolder
@@ -49,10 +51,17 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var ownerActivity: LifecycleOwner? = null
 
-    private var pActivity: AppCompatActivity? = null
+    private var pActivity: NavigationActivity? = null
+
+    private var pContext: Context? = null
+
+    private var fab: FloatingActionButton? = null
+
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
+
+        pContext = context
         if (context is SearchQueryObservable) {
             queryListener = context
         }
@@ -61,14 +70,20 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
             switchActivity = context
         }
 
+        if (context is NavigationActivity) {
+            fab = context.fab
+        }
+
         ownerActivity = context as AppCompatActivity
-        pActivity = context as AppCompatActivity
+
     }
 
     override fun onDetach() {
         super.onDetach()
         queryListener = null
         ownerActivity = null
+        fab = null
+        pContext = null
         pActivity = null
     }
 
@@ -151,6 +166,14 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
         )
+
+        fab?.hide()
+
+        fab?.setOnClickListener {
+            vm.mQuery = ""
+            vm.requestData()
+            fab?.hide()
+        }
     }
 
     private fun resetPagination() {
@@ -160,6 +183,10 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        if (pContext is NavigationActivity) {
+            pActivity = pContext as NavigationActivity
+//            pActivity.fab
+        }
 
         vm.liveNewsResult.observe(
                 this,
@@ -184,6 +211,18 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
         )
 
+        vm.isSearch.observe(this, Observer {
+            logd("vm.isSearch.observe.value = ${vm.isSearch.value}")
+            logd("vm.isSearch.observe.value.fab = ${fab}")
+
+
+            if (vm.isSearch.value == true) {
+                pActivity?.fab?.show()
+            } else {
+                pActivity?.fab?.hide()
+            }
+        })
+
         if (!vm.isFirstLaunched) {
             logd("vm.isFirstLaunched")
             vm.isFirstLaunched = true
@@ -192,12 +231,10 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
             logd("vm.requestData:size = ${vm.standardAdapter!!.size}")
             showData()
         }
-
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
-//        vm.standardAdapter!!.
     }
 
     private fun showData() {
@@ -227,7 +264,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
                 resetPagination()
                 true
-                // todo implement refresh button here
             }
             R.id.action_subscription -> {
                 startActivityForResult(Intent(activity, SubSourceActivity::class.java), SubSourceActivity.SUBSCRIPTION_RESULT_CODE)

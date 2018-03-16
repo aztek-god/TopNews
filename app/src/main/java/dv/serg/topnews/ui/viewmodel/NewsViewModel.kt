@@ -35,6 +35,7 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
 
     val liveNewsResult: MutableLiveData<Outcome<List<Article>>> = MutableLiveData()
 
+
     var standardAdapter: StandardAdapter<Article, NewsViewHolder>? = null
 
     private var sources: String? = null
@@ -61,10 +62,14 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
 
     private var response: Flowable<Response> = getResponse()
 
-    var mQuery: String by Delegates.observable("") { property, oldValue, newValue ->
+    val isSearch: MutableLiveData<Boolean> = MutableLiveData()
+
+    var mQuery: String by Delegates.observable("") { _, oldValue, newValue ->
         if (newValue != oldValue && newValue.isNotEmpty()) {
             response = getResponse(newValue)
         }
+
+        isSearch.value = !newValue.isEmpty()
 
         if (newValue != oldValue) {
             currentPage = 1

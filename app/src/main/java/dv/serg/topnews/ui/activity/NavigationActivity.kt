@@ -2,6 +2,7 @@ package dv.serg.topnews.ui.activity
 
 import android.os.Bundle
 import android.support.annotation.IdRes
+import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
@@ -33,10 +34,14 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
 
     override var query: String = ""
 
+    var fab: FloatingActionButton? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navigation)
         setSupportActionBar(toolbar)
+
+        fab = news_fab
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
