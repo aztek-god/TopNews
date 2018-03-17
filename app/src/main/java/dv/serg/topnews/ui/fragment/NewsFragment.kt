@@ -39,52 +39,53 @@ import javax.inject.Inject
 
 class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var mViewModelFactory: ViewModelProvider.Factory
 
-    private var queryListener: SearchQueryObservable? = null
-    private var switchActivity: SwitchActivity? = null
+    private var mQueryListener: SearchQueryObservable? = null
+    private var mSwitchActivity: SwitchActivity? = null
 
     private val vm: NewsViewModel by lazy {
-        ViewModelProviders.of(this, viewModelFactory).get(NewsViewModel::class.java)
+        ViewModelProviders.of(this, mViewModelFactory).get(NewsViewModel::class.java)
     }
 
-    private var ownerActivity: LifecycleOwner? = null
+    private var mOwnerActivity: LifecycleOwner? = null
 
-    private var pActivity: NavigationActivity? = null
+    private var mParentActivity: NavigationActivity? = null
 
-    private var pContext: Context? = null
+    private var mContext: Context? = null
 
-    private var fab: FloatingActionButton? = null
+    private var mfab: FloatingActionButton? = null
 
     private lateinit var mAdapter: StandardAdapter<Article, NewsViewHolder>
+
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        pContext = context
+        mContext = context
         if (context is SearchQueryObservable) {
-            queryListener = context
+            mQueryListener = context
         }
 
         if (context is SwitchActivity) {
-            switchActivity = context
+            mSwitchActivity = context
         }
 
         if (context is NavigationActivity) {
-            fab = context.fab
+            mfab = context.fab
         }
 
-        ownerActivity = context as AppCompatActivity
+        mOwnerActivity = context as AppCompatActivity
 
     }
 
     override fun onDetach() {
         super.onDetach()
-        queryListener = null
-        ownerActivity = null
-        fab = null
-        pContext = null
-        pActivity = null
+        mQueryListener = null
+        mOwnerActivity = null
+        mfab = null
+        mContext = null
+        mParentActivity = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -178,6 +179,27 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         super.onActivityCreated(savedInstanceState)
 
 
+        mfab?.setOnClickListener {
+            vm.mQuery = ""
+            vm.requestData()
+        }
+
+        if (vm.mQuery.isEmpty()) {
+            mfab?.hide()
+        } else {
+            mfab?.show()
+        }
+
+        vm.mQueryChangeListener = {
+            if (it.isEmpty()) {
+                mfab?.hide()
+            } else {
+                mfab?.show()
+            }
+        }
+
+
+
         vm.liveNewsResult.observe(
                 this,
                 Observer {
@@ -203,9 +225,9 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
         vm.isSearch.observe(this, Observer {
             if (vm.isSearch.value == true) {
-                pActivity?.fab?.show()
+                mParentActivity?.fab?.show()
             } else {
-                pActivity?.fab?.hide()
+                mParentActivity?.fab?.hide()
             }
         })
 

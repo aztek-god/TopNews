@@ -5,25 +5,37 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.support.v4.content.ContextCompat
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
+import dv.serg.lib.utils.logd
+import dv.serg.topnews.R
 import io.reactivex.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
 
-fun ImageView.load(uri: String) {
+fun ImageView.load(uri: String?) {
     Observable.fromCallable {
+        if (uri == null) {
+            throw Exception()
+        }
         val load: RequestBuilder<Drawable> = Glide.with(this).load(uri)
         load
     }
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { it: RequestBuilder<Drawable> ->
+            .subscribe({ it: RequestBuilder<Drawable> ->
                 it.into(this)
-            }
+            }, {
+                //                AppContext.appContext.
+                logd("serg.dv throwale")
+                val drawable = ContextCompat.getDrawable(this.context, R.drawable.no_image)
+                this.setImageDrawable(drawable)
+
+            })
 }
 
 fun ImageView.loadDrawable(uri: String) {

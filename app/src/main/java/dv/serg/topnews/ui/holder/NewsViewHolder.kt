@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import dv.serg.lib.android.context.v4.toastShort
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.topnews.R
 import dv.serg.topnews.app.Constants
@@ -42,49 +41,61 @@ class NewsViewHolder(private val view: View, private val throwableHandler: (Thro
         try {
             source.text = item.source?.name
             content.text = item.description
-//            getStringDateTime()
             datetime.text = getStringDateTime(context, item.publishedAt
                     ?: "", Constants.Time.DEFAULT_DATETIME_PATTERN)
             header.text = item.title
 
-            thumb.load(item.urlToImage
-                    ?: throw LoadImageException("Unable to load image as placeholder with invalid url. The url's value is ${item.urlToImage}"))
+            thumb.load(item.urlToImage)
 
-            bottomMenu.apply {
-                setOnItem1ClickListener {
-                    openBrowser(context!!, item.url!!)
-                    toastShort("!!!")
-                    dismiss()
+            with(bottomMenu) {
+                apply {
+                    setOnItem1ClickListener {
+                        openBrowser(context!!, item.url!!)
+                        dismiss()
+                    }
                 }
-                setOnItem2ClickListener {
-                    val clipboard = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Copied", item.url)
-                    clipboard.primaryClip = clip
-                    dismiss()
+                apply {
+                    setOnItem2ClickListener {
+                        val clipboard = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Copied", item.url)
+                        clipboard.primaryClip = clip
+                        dismiss()
+                    }
                 }
-                setOnItem3ClickListener {
-                    val clipboard = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Copied", item.urlToImage)
-                    clipboard.primaryClip = clip
-                    dismiss()
+                apply {
+                    setOnItem3ClickListener {
+                        val clipboard = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Copied", item.urlToImage)
+                        clipboard.primaryClip = clip
+                        dismiss()
+                    }
                 }
-                setOnItem4ClickListener {
-                    addToFilterAction.invoke(item)
-                    dismiss()
+                apply {
+                    setOnItem4ClickListener {
+                        addToFilterAction.invoke(item)
+                        dismiss()
+                    }
                 }
-                setOnItem5ClickListener {
-                    addToBookmarkAction.invoke(item)
-                    dismiss()
+                apply {
+                    setOnItem5ClickListener {
+                        addToBookmarkAction.invoke(item)
+                        dismiss()
+                    }
                 }
             }
 
-            root.setOnLongClickListener {
-                bottomMenu.show(fm, bottomMenu.tag)
-                true
-            }
-
-            root.setOnClickListener {
-                shortClickListener.invoke(item)
+            with(root) {
+                apply {
+                    setOnLongClickListener {
+                        bottomMenu.show(fm, bottomMenu.tag)
+                        true
+                    }
+                }
+                apply {
+                    setOnClickListener {
+                        shortClickListener.invoke(item)
+                    }
+                }
             }
 
         } catch (ex: Exception) {

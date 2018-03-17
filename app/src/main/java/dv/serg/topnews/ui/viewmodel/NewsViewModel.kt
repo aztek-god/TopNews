@@ -56,7 +56,6 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
 
     private lateinit var response: Flowable<Response>
 
-
     val isSearch: MutableLiveData<Boolean> = MutableLiveData()
 
     var mQuery: String by Delegates.observable("") { _, oldValue, newValue ->
@@ -68,8 +67,11 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
 
         if (newValue != oldValue) {
             currentPage = 1
+            mQueryChangeListener.invoke(newValue)
         }
     }
+
+    var mQueryChangeListener: (query: String) -> Unit = {}
 
     var isFirstLaunched = false
 
