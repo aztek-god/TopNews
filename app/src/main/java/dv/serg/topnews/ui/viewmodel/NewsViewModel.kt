@@ -33,9 +33,6 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
 
     val liveNewsResult: MutableLiveData<Outcome<List<Article>>> = MutableLiveData()
 
-
-//    var standardAdapter: StandardAdapter<Article, NewsViewHolder>? = null
-
     private var sources: String? = null
 
     var isLoading = false
@@ -43,6 +40,8 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
     val filterList: MutableList<Article> = ArrayList()
 
     private fun getResponse(query: String = "", currentPage: Int = 1): Flowable<Response> {
+        // serg.dv getResponse:sources = null
+        logd("serg.dv getResponse:sources = $sources")
         return if (query.isEmpty()) {
             retrofit.create(NewsService::class.java).request(sources
                     ?: "lenta", currentPage.toString())
@@ -58,6 +57,7 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
             field = value
         }
 
+    //    private var response: Flowable<Response> = getResponse()
     private var response: Flowable<Response> = getResponse()
 
     val isSearch: MutableLiveData<Boolean> = MutableLiveData()
@@ -82,7 +82,7 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
         UPDATE, APPEND
     }
 
-    private val getAllFromDao: Flowable<String> = subscribeRepo.getAll()
+    private fun getAllFromDao(): Flowable<String> = subscribeRepo.getAll()
             .performOnIoThread()
             .flatMap {
                 val s = it.joinToString(",", transform = { it.code })
@@ -92,14 +92,10 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
     private fun getRequestData(loadMode: LoadMode = LoadMode.UPDATE): Flowable<List<Article>?> = response.performOnIoThread()
             .doOnSubscribe { liveNewsResult.value = Outcome.loading(true) }
             .doOnSubscribe { this.loadMode = loadMode }
-            .doOnSubscribe {
-                isLoading = true
-            }
+            .doOnSubscribe { isLoading = true }
             .doOnComplete { liveNewsResult.value = Outcome.loading(false) }
             .doOnComplete { isLoading = false }
-            .flatMap {
-                Flowable.just(it.articles)
-            }
+            .flatMap { Flowable.just(it.articles) }
             .flatMap {
                 val filteredList: List<Article> = it.minus(filterList)
                 Flowable.just(filteredList)
@@ -107,9 +103,10 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
 
 
     fun requestData(loadMode: LoadMode = LoadMode.UPDATE) {
-        logd("requestData with = $currentPage")
         if (sources == null) {
-            getAllFromDao.doOnNext {
+            getAllFromDao().doOnNext {
+                // serg.dv requestData:getAllFromDao:sources = buzzfeed,axios
+                logd("serg.dv requestData:getAllFromDao:sources ${it}")
                 sources = it
             }.subscribe {
                 loadData(loadMode)

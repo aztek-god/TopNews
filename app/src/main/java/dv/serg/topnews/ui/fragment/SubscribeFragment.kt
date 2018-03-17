@@ -44,6 +44,7 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Injector.injectFragment(this)
 
         if (vm.subSourceAdapter == null) {
             vm.subSourceAdapter = StandardAdapter(R.layout.news_resource_layout, { v ->
@@ -71,7 +72,6 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Injector.injectFragment(this)
 
 
         fr_recycler.apply {
@@ -87,10 +87,8 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
                     val entities = vm.subSourceAdapter?.filter { it.isSelected }
                     entities?.let {
                         vm.save(entities) {
-                            //                            vm.run {
-//                                subSourceAdapter?.forEach { it.isSelected = false }
-//                                subSourceAdapter?.notifyDataSetChanged()
-//                            }
+                            vm.subSourceAdapter?.forEach { it.isSelected = false }
+                            vm.subSourceAdapter?.notifyDataSetChanged()
 
                             activity?.setResult(SubSourceActivity.SUBSCRIPTION_RESULT_CODE)
                             activity?.finish()
