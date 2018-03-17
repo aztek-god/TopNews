@@ -2,7 +2,6 @@ package dv.serg.topnews.ui.viewmodel
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import dv.serg.lib.utils.logd
 import dv.serg.topnews.app.performOnIoThread
 import dv.serg.topnews.dao.ArticleContract
 import dv.serg.topnews.model.Article
@@ -40,8 +39,6 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
     val filterList: MutableList<Article> = ArrayList()
 
     private fun getResponse(query: String = "", currentPage: Int = 1): Flowable<Response> {
-        // serg.dv getResponse:sources = null
-        logd("serg.dv getResponse:sources = $sources")
         return if (query.isEmpty()) {
             retrofit.create(NewsService::class.java).request(sources
                     ?: "lenta", currentPage.toString())
@@ -57,8 +54,8 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
             field = value
         }
 
-    //    private var response: Flowable<Response> = getResponse()
-    private var response: Flowable<Response> = getResponse()
+    private lateinit var response: Flowable<Response>
+
 
     val isSearch: MutableLiveData<Boolean> = MutableLiveData()
 
@@ -105,9 +102,8 @@ class NewsViewModel(private val retrofit: Retrofit, private val subscribeRepo: S
     fun requestData(loadMode: LoadMode = LoadMode.UPDATE) {
         if (sources == null) {
             getAllFromDao().doOnNext {
-                // serg.dv requestData:getAllFromDao:sources = buzzfeed,axios
-                logd("serg.dv requestData:getAllFromDao:sources ${it}")
                 sources = it
+                response = getResponse()
             }.subscribe {
                 loadData(loadMode)
             }
