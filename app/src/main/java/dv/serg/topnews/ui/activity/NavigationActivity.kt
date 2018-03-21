@@ -8,6 +8,7 @@ import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBar
 import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
 import android.view.View
@@ -15,6 +16,7 @@ import dv.serg.lib.android.context.toastShort
 import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
 import dv.serg.topnews.ui.fragment.NewsFragment
+import dv.serg.topnews.ui.fragment.RecordFragment
 import dv.serg.topnews.util.SwitchActivity
 import io.reactivex.Observable
 import kotlinx.android.synthetic.main.activity_navigation.*
@@ -42,6 +44,8 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
 
     private lateinit var vm: PersistFragment
 
+    var mToolbar: ActionBar? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navigation)
@@ -50,6 +54,8 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
         vm = ViewModelProviders.of(this).get(PersistFragment::class.java)
 
         fab = news_fab
+
+        mToolbar = supportActionBar
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -63,7 +69,6 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
             handleFragment(currentLayoutId)
         }
 
-        logd(vm.currentFragment.toString())
     }
 
     override fun onBackPressed() {
@@ -106,10 +111,10 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
     private fun handleFragment(@IdRes menuItemRes: Int) {
 
         // todo
-        mCurrentFragmentTag = NewsFragment.TAG
+        mCurrentFragmentTag = RecordFragment.TAG
 
         if (vm.currentFragment == null) {
-            vm.currentFragment = NewsFragment()
+            vm.currentFragment = RecordFragment.newInstance(RecordFragment.Companion.Type.BOOKMARK)
         }
         supportFragmentManager.beginTransaction().replace(R.id.fr_holder, vm.currentFragment, mCurrentFragmentTag).commit()
 //        logd("${hashCode()} handleFragment{menuItemRes = $menuItemRes}")
@@ -138,7 +143,7 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
 //            }
 //            R.id.history_item -> {
 //                hideFragmentsExceptFor("")
-//                supportFragmentManager.beginTransaction().add(R.id.fr_holder, HistoryFragment.newInstance()).commit()
+//                supportFragmentManager.beginTransaction().add(R.id.fr_holder, RecordFragment.newInstance()).commit()
 //            }
 //            R.id.bookmark_item -> {
 //                hideFragmentsExceptFor("")

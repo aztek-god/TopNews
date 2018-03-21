@@ -8,13 +8,13 @@ import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
+import android.support.v7.app.ActionBar
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import dv.serg.lib.android.context.v4.toastShort
 import dv.serg.lib.collection.StandardAdapter
-import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
 import dv.serg.topnews.di.Injector
 import dv.serg.topnews.model.Article
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
-class HistoryFragment : Fragment() {
+class RecordFragment : Fragment() {
 
     @Inject
     lateinit var vmf: ViewModelProvider.Factory
@@ -47,27 +47,51 @@ class HistoryFragment : Fragment() {
 
     private var mFab: FloatingActionButton? = null
 
+    private var mParentActionBar: ActionBar? = null
+
+    private lateinit var mType: Type
+
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if (context is NavigationActivity) {
             mFab = context.fab
         }
-
+        if (context is NavigationActivity) {
+            mParentActionBar = context.mToolbar
+        }
     }
 
     override fun onDetach() {
         super.onDetach()
+        mParentActionBar = null
         mFab = null
     }
 
     private var mDeletedIndex: Int? = null
+    private lateinit var mToolbarLabel: String
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         Injector.injectFragment(this)
 
-        mAdapter = StandardAdapter(R.layout.history_item_layout, { view ->
+        mType = Type.values()[arguments?.getInt(TYPE_TAG)!!]
+
+        when (mType) {
+            Type.HISTORY -> {
+                mToolbarLabel = getString(R.string.history_fragment_label)
+                vm.type = Article.Type.HISTORY
+            }
+            Type.BOOKMARK -> {
+                mToolbarLabel = getString(R.string.bookmark_fragment_label)
+                vm.type = Article.Type.BOOKMARK
+            }
+        }
+
+        mParentActionBar?.title = mToolbarLabel
+
+        mAdapter = StandardAdapter(R.layout.record_item_layout, { view ->
             val holder = HistoryViewHolder(view = view)
 
             holder.apply {
@@ -91,7 +115,7 @@ class HistoryFragment : Fragment() {
 
                 }
                 actionButtonListener = {
-                    openBrowser(this@HistoryFragment.context!!, mAdapter!![it].url!!)
+                    openBrowser(this@RecordFragment.context!!, mAdapter!![it].url!!)
                 }
             }
         })
@@ -107,12 +131,6 @@ class HistoryFragment : Fragment() {
 
         swipe_ref.isEnabled = false
 
-//        activity?.actionBar?.setDisplayHomeAsUpEnabled(true)
-//        activity?.action
-//        mToolbar!!.setDisplayHomeAsUpEnabled
-        logd("serg.dv:actionbar = ${activity?.actionBar}")
-
-
         vm.mRecordLiveData.getData().observe(this, Observer { data ->
             if (mNotify) {
                 mAdapter?.update(data ?: emptyList())
@@ -120,7 +138,7 @@ class HistoryFragment : Fragment() {
             mNotify = true
         })
 
-        mFab!!.visibility = View.GONE
+        mFab?.visibility = View.GONE
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -133,9 +151,20 @@ class HistoryFragment : Fragment() {
 
 
     companion object {
-        const val TAG = "HistoryFragment"
-        fun newInstance(): HistoryFragment {
-            return HistoryFragment()
+        const val TAG = "RecordFragment"
+
+        enum class Type {
+            HISTORY, BOOKMARK
+        }
+
+        private const val TYPE_TAG = "typeTag"
+
+        fun newInstance(type: Type): RecordFragment {
+            return RecordFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(TYPE_TAG, type.ordinal)
+                }
+            }
         }
     }
 }
