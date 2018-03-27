@@ -25,9 +25,6 @@ object Constants {
         )
     }
 
-    object Resources {
-        const val CHOOSER_TITLE: String = "chooser_title"
-    }
 
     object Time {
         const val DEFAULT_DATETIME_PATTERN = "yyyy'-'MM'-'dd'T'HH':'mm':'ss"
