@@ -53,9 +53,6 @@ abstract class LoggingFragment : Fragment() {
         logd("${hashCode()}:onViewCreated{view = $view, savedInstanceState = $savedInstanceState}")
         super.onViewCreated(view, savedInstanceState)
 
-        // example
-//        ListView lv = (ListView) view.findViewById(R.id.lvSome);
-//        lv.setAdapter(adapter);
     }
 
     // This method is called after the parent Activity's onCreate() method has completed.

@@ -3,6 +3,7 @@ package dv.serg.topnews.ui.fragment
 import android.arch.lifecycle.LifecycleOwner
 import android.content.Context
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,7 @@ import dv.serg.topnews.R
 import dv.serg.topnews.ui.pager.FragmentViewPager
 import kotlinx.android.synthetic.main.content_top_news.*
 
-class HotNewsFragment : LoggingFragment() {
+class HotNewsFragment : Fragment() {
 
     private var parentOwner: LifecycleOwner? = null
 
@@ -46,5 +47,7 @@ class HotNewsFragment : LoggingFragment() {
         fun newInstance(): HotNewsFragment {
             return HotNewsFragment()
         }
+
+        const val TAG = "HotNewsFragment"
     }
 }

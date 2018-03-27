@@ -11,6 +11,6 @@ interface FragmentComponent {
     fun inject(fragment: InfoFragment)
     fun inject(fragment: NewsFragment)
     fun inject(fragment: SubscribeFragment)
-    fun inject(fragment: HistoryFragment)
+    fun inject(fragment: RecordFragment)
     fun inject(fragment: BookmarkFragment)
 }

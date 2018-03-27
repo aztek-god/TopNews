@@ -2,11 +2,12 @@
 <resources>
 
     <!--<color name="colorPrimary">#4caf50</color>-->
-    <color name="colorPrimary">#273238</color>
+    <color name="colorPrimary">#3F51B5</color>
     <!--<color name="colorPrimaryDark">#388E3C</color>-->
-    <color name="colorPrimaryDark">#a81f282c</color>
-    <color name="primaryLight">#C8E6C9</color>
-    <color name="colorAccent">#ff9800</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="primaryLight">#C5CAE9</color>
+    <color name="colorAccent">#448AFF</color>
+    <color name="transparentBlackBackground">#9e0e121a</color>
     <color name="primaryText">#212121</color>
     <color name="secondaryText">#757575</color>
     <color name="icons">#cdb4b4</color>
@@ -17,4 +18,5 @@
     <color name="grey_60">#666666</color>
     <color name="background_color">#fafafa</color>
     <color name="history_border_color">#f2f2f2</color>
+    <color name="drop_btn_color">#007AFF</color>
 </resources>

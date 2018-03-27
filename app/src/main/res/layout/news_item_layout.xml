@@ -6,7 +6,10 @@
     android:id="@+id/news_item_root_id"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp">
+    android:layout_margin="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -17,7 +20,7 @@
         <!--app:srcCompat="@color/colorAccent"-->
 
         <TextView
-            android:id="@+id/source"
+            android:id="@+id/source_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -44,7 +47,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/datetime"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/source"
+            app:layout_constraintStart_toStartOf="@+id/source_name"
             app:layout_constraintTop_toBottomOf="@+id/thumb" />
 
         <ImageView
@@ -58,7 +61,7 @@
             app:layout_constraintDimensionRatio="w,16:9"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/source"
+            app:layout_constraintTop_toBottomOf="@+id/source_name"
             app:srcCompat="@color/colorAccent" />
 
         <ImageView
@@ -71,7 +74,7 @@
             app:layout_constraintStart_toStartOf="@+id/thumb"
             app:layout_constraintTop_toTopOf="@+id/thumb"
             app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@color/colorPrimaryDark" />
+            app:srcCompat="@color/transparentBlackBackground" />
 
         <TextView
             android:id="@+id/header"
@@ -101,10 +104,10 @@
             android:layout_marginEnd="8dp"
             android:text="TextView"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-            app:layout_constraintBaseline_toBaselineOf="@+id/source"
+            app:layout_constraintBaseline_toBaselineOf="@+id/source_name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/source" />
+            app:layout_constraintStart_toEndOf="@+id/source_name" />
 
     </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>

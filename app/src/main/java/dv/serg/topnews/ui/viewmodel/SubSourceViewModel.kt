@@ -12,7 +12,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
 
-// todo repo for saving user selected resources
 class SubSourceViewModel(private val repo: Contract.Repository) : ViewModel() {
 
     var subSourceAdapter: StandardAdapter<SubSource, SubSourceViewHolder>? = null
@@ -23,7 +22,6 @@ class SubSourceViewModel(private val repo: Contract.Repository) : ViewModel() {
 
     val selectedCount: Int get() = subSourceAdapter?.count { it.isSelected } ?: 0
 
-    // todo fix encapsulation
     val availableSources: List<SubSource> = getResources()
 
     fun save(entities: List<SubSource>, action: () -> Unit) {

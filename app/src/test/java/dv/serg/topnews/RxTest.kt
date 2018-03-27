@@ -1,26 +1,20 @@
 package dv.serg.topnews
 
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import org.junit.Test
 import java.util.concurrent.TimeUnit
 
+
 class RxTest {
 
     @Test
     fun testTypeOf() {
-        val dataList = listOf(
-                "str", 1, true, "developer", false
-        )
 
         var counter = 0
 
-        Observable
-                .fromIterable(dataList)
-                .ofType(Boolean::class.java)
-
-                .subscribe { println("output is $it") }
     }
 
     @Test
@@ -29,7 +23,6 @@ class RxTest {
                 "str", "true", "developer", "false"
         )
 
-//        var counter = 0
 
         val obs = Observable
                 .just("str", "true", "developer", "false")
@@ -41,13 +34,6 @@ class RxTest {
         switchObs.subscribe {
             println(it)
         }
-//                .doOnNext {
-//                    counter++
-//                }
-//                .switchMap {
-//                    Observable.just("$it flatted")
-//                }
-//                .subscribe { println("output is $it, counter = $counter") }
 
     }
 
@@ -64,6 +50,14 @@ class RxTest {
     }
 
     @Test
+    fun groupByTest() {
+        val list = listOf("s", "ss", "sss", "ss")
+
+        list.groupBy { it.length }.forEach { println(it) }
+    }
+
+
+    @Test
     fun publisherTest() {
         val subject: Subject<String> = PublishSubject.create()
 
@@ -74,5 +68,44 @@ class RxTest {
                 .doOnNext {
                     subject.onNext(it)
                 }.subscribe()
+    }
+
+    @Test
+    fun replayTest() {
+        val autoConnect: Observable<Int> = Observable.fromIterable(listOf(1, 2, 3)).replay(2).autoConnect(2)
+
+        autoConnect.subscribe {
+            println(it)
+        }
+
+        autoConnect.subscribe {
+            println(it)
+        }
+    }
+
+    @Test
+    fun testTo() {
+        Observable.just(1, 2, 3).blockingForEach { println(it) }
+        Observable.just(1, 2, 3).to { t: Observable<Int> -> t.subscribe() }.dispose()
+    }
+
+    @Test
+    fun anyTest() {
+        val any: Single<Boolean> = Observable.just(1, 2, 3).any { it < 5 }
+        any.subscribe { t1, t2 -> println(t1) }
+    }
+
+    @Test
+    fun ambTest() {
+        val observables = listOf(Observable.just(1, 2, 3).delay(10, TimeUnit.NANOSECONDS), Observable.just(4, 5, 6))
+
+        Observable.amb(observables).subscribe { println(it) }
+    }
+
+    @Test
+    fun allTest() {
+        val all: Single<Boolean> = Observable.just(1, 2, 3, 4, 5, 6).all { it < 10 }
+
+        Observable.just(1, 2, 3, 4, 5, 6).all { it < 10 }.subscribe { t1: Boolean?, t2: Throwable? -> println(t1) }
     }
 }

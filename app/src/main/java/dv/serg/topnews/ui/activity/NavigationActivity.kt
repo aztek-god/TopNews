@@ -4,7 +4,6 @@ import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.annotation.IdRes
-import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
@@ -13,18 +12,21 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
 import android.view.View
 import dv.serg.lib.android.context.toastShort
-import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
+import dv.serg.topnews.data.SwitchActivity
+import dv.serg.topnews.exts.transaction
+import dv.serg.topnews.ui.fragment.HotNewsFragment
 import dv.serg.topnews.ui.fragment.NewsFragment
 import dv.serg.topnews.ui.fragment.RecordFragment
-import dv.serg.topnews.util.SwitchActivity
+import dv.serg.topnews.ui.view.FabButton
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_navigation.*
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.content_navigation.*
 import java.util.concurrent.TimeUnit
 
-class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSelectedListener, NewsFragment.SearchQueryObservable, SwitchActivity {
+class NavigationActivity : AbstractActivity(), NavigationView.OnNavigationItemSelectedListener, NewsFragment.SearchQueryObservable, SwitchActivity {
 
     override fun showDataLayout() {
         fr_holder.visibility = View.VISIBLE
@@ -38,11 +40,13 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
 
     override var query: String = ""
 
-    var fab: FloatingActionButton? = null
+    enum class ToolbarAction {
+        HIDE, SHOW
+    }
 
-    private var mCurrentFragmentTag: String? = null
 
-    private lateinit var vm: PersistFragment
+    private lateinit
+    var vm: PersistFragment
 
     var mToolbar: ActionBar? = null
 
@@ -51,11 +55,11 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
         setContentView(R.layout.activity_navigation)
         setSupportActionBar(toolbar)
 
+
         vm = ViewModelProviders.of(this).get(PersistFragment::class.java)
 
-        fab = news_fab
-
         mToolbar = supportActionBar
+
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -69,6 +73,47 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
             handleFragment(currentLayoutId)
         }
 
+        vm.toolbarObserver
+                .distinctUntilChanged()
+                .subscribe {
+                    when (it) {
+                        ToolbarAction.HIDE -> supportActionBar?.hide()
+                        ToolbarAction.SHOW -> supportActionBar?.show()
+                        else -> {
+                            toastShort("There was failure to try of hiding of action bar.")
+                        }
+                    }
+                }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        vm.currentFabState = news_fab?.visibility ?: View.VISIBLE
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        news_fab?.visibility = vm.currentFabState
+    }
+
+    fun fabBtnHide() {
+        news_fab.hide()
+    }
+
+    fun fabBtnShow() {
+        news_fab.show()
+    }
+
+    fun hideToolbar() {
+        vm.toolbarObserver.onNext(ToolbarAction.HIDE)
+    }
+
+    fun showToolbar() {
+        vm.toolbarObserver.onNext(ToolbarAction.SHOW)
+    }
+
+    fun setFabBtnAction(action: (FabButton) -> Unit = {}) {
+        news_fab.setOnClickListener { action.invoke(news_fab) }
     }
 
     override fun onBackPressed() {
@@ -110,52 +155,36 @@ class NavigationActivity : LoggingActivity(), NavigationView.OnNavigationItemSel
 
     private fun handleFragment(@IdRes menuItemRes: Int) {
 
-        // todo
-        mCurrentFragmentTag = RecordFragment.TAG
-
-        if (vm.currentFragment == null) {
-            vm.currentFragment = RecordFragment.newInstance(RecordFragment.Companion.Type.BOOKMARK)
+        when (menuItemRes) {
+            R.id.hot_news_item -> {
+                toolbar.title = getString(R.string.screen_title_hot_news)
+                vm.currentFragment = HotNewsFragment()
+            }
+            R.id.news_item -> {
+                toolbar.title = getString(R.string.screen_title_news)
+                vm.currentFragment = NewsFragment()
+            }
+            R.id.history_item -> {
+                toolbar.title = getString(R.string.screen_title_history)
+                vm.currentFragment = RecordFragment.newInstance(RecordFragment.Companion.Type.HISTORY)
+            }
+            R.id.bookmark_item -> {
+                toolbar.title = getString(R.string.screen_title_bookmarks)
+                vm.currentFragment = RecordFragment.newInstance(RecordFragment.Companion.Type.BOOKMARK)
+            }
         }
-        supportFragmentManager.beginTransaction().replace(R.id.fr_holder, vm.currentFragment, mCurrentFragmentTag).commit()
-//        logd("${hashCode()} handleFragment{menuItemRes = $menuItemRes}")
-//        when (menuItemRes) {
-//            R.id.hot_news_item -> {
-//                val tag = HotNewsFragment::class.java.name
-//                var fr: Fragment? = supportFragmentManager.findFragmentByTag(tag)
-//                if (fr == null) {
-//                    fr = HotNewsFragment()
-//                    supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr, tag).commit()
-//                } else {
-//                    supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr, tag).commit()
-//                }
-////                hideFragmentsExceptFor(tag)
-//            }
-//            R.id.news_item -> {
-//                val tag = NewsFragment::class.java.name
-//                var fr: Fragment? = supportFragmentManager.findFragmentByTag(tag)
-//                if (fr == null) {
-//                    fr = NewsFragment()
-//                    supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr, tag).commit()
-//                } else {
-//                    supportFragmentManager.beginTransaction().replace(R.id.fr_holder, fr, tag).commit()
-//                }
-////                hideFragmentsExceptFor(tag)
-//            }
-//            R.id.history_item -> {
-//                hideFragmentsExceptFor("")
-//                supportFragmentManager.beginTransaction().add(R.id.fr_holder, RecordFragment.newInstance()).commit()
-//            }
-//            R.id.bookmark_item -> {
-//                hideFragmentsExceptFor("")
-//                supportFragmentManager.beginTransaction().add(R.id.fr_holder, BookmarkFragment.newInstance()).commit()
-//            }
-//        }
 
 
-        logd("supportFragmentManager.fragments = ${supportFragmentManager.fragments}")
+        supportFragmentManager.transaction { tr -> tr.replace(R.id.fr_holder, vm.currentFragment) }
     }
+
 
     class PersistFragment : ViewModel() {
         var currentFragment: Fragment? = null
+        var currentFabState: Int = View.VISIBLE
+
+        val toolbarObserver = PublishSubject.create<ToolbarAction>()
     }
 }
+
+

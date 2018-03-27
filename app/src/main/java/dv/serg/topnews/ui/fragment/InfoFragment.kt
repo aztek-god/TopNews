@@ -6,32 +6,34 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import dv.serg.lib.android.context.v4.toastShort
+import android.view.*
 import dv.serg.lib.collection.StandardAdapter
-import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
 import dv.serg.topnews.app.AppContext
-import dv.serg.topnews.app.Constants
+import dv.serg.topnews.data.Outcome
 import dv.serg.topnews.di.Injector
+import dv.serg.topnews.exts.isNetworkConnected
+import dv.serg.topnews.exts.openBrowser
+import dv.serg.topnews.exts.setColor
+import dv.serg.topnews.exts.update
 import dv.serg.topnews.model.Article
+import dv.serg.topnews.ui.activity.NavigationActivity
 import dv.serg.topnews.ui.holder.HotNewsHolder
 import dv.serg.topnews.ui.viewmodel.HotNewsViewModel
-import dv.serg.topnews.util.ObservableProperty
+import kotlinx.android.synthetic.main.empty_layout.*
+import kotlinx.android.synthetic.main.misc_layout.*
+import kotlinx.android.synthetic.main.no_internet_connection_layout.*
 import kotlinx.android.synthetic.main.simple_list_layout.*
 import javax.inject.Inject
 
-class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
+class InfoFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var mSourceType: String? = null
 
-    // todo sort out this
     private var isRefreshing = false
 
     private val vm by lazy {
@@ -41,37 +43,23 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     @Inject
     lateinit var retrofitViewModelFactory: ViewModelProvider.Factory
 
+    private lateinit var mAdapter: StandardAdapter<Article, HotNewsHolder>
+
     private var parentOwner: LifecycleOwner? = null
+
+    private var mParentActivity: NavigationActivity? = null
+
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         parentOwner = context as LifecycleOwner
+        mParentActivity = context as NavigationActivity
     }
 
     override fun onDetach() {
         super.onDetach()
         parentOwner = null
-    }
-
-    private val propertyObserver: ObservableProperty<Constants.RequestState> = ObservableProperty(Constants.RequestState.IDLE).also { it ->
-        it.registerAsObserver(object : ObservableProperty.PropertyObserver<Constants.RequestState> {
-            override fun observe(value: Constants.RequestState) {
-                when (value) {
-                    Constants.RequestState.IDLE -> {
-                        doOnIdle()
-                    }
-                    Constants.RequestState.LOADING -> {
-                        doOnLoading()
-                    }
-                    Constants.RequestState.COMPLETE -> {
-                        doOnComplete()
-                    }
-                    Constants.RequestState.ERROR -> {
-                        doOnError()
-                    }
-                }
-            }
-        })
+        mParentActivity = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,26 +67,42 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
         super.onCreate(savedInstanceState)
         if (arguments != null) {
-            mSourceType = arguments!!.getString(FRAGMENT_NAME)
+            mSourceType = arguments?.getString(FRAGMENT_NAME)
         }
 
         setHasOptionsMenu(true)
 
-        if (savedInstanceState == null) {
-            vm.standardAdapter = StandardAdapter(R.layout.hot_news_item_layout, { e: View ->
-                HotNewsHolder(e, { pos ->
-                    vm.saveBookmark(vm.standardAdapter[pos])
-                })
-            })
-            vm.propertyObserver = propertyObserver
-        }
+        mAdapter = StandardAdapter(R.layout.hot_news_item_layout, { e: View ->
+            val receiver = HotNewsHolder(e)
+            with(receiver) {
+                apply { fm = childFragmentManager }
+                apply {
+                    addToFilterAction = { item ->
+                        vm.addToFilter(item)
+                        mAdapter.remove(item)
+                    }
+                }
+                apply {
+                    clickListener = {
+                        openBrowser(this@InfoFragment.context ?: AppContext.appContext, it.url
+                                ?: "")
+                        vm.saveAsHistory(it)
+                    }
+                }
+                apply {
+                    addToBookmarkAction = {
+                        vm.saveAsBookmark(it)
+                    }
+                }
+            }
+        })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
         super.onCreateView(inflater, container, savedInstanceState)
-        return inflater.inflate(R.layout.simple_list_layout, container, false)
+        return inflater.inflate(R.layout.misc_layout, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -110,47 +114,101 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
         swipe_ref.setColorSchemeColors(ContextCompat.getColor(AppContext.appContext, R.color.colorAccent))
 
-        fr_recycler.apply {
-            layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        with(fr_recycler) {
+            apply {
+                layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+            }
+            apply { adapter = mAdapter }
         }
 
+        retry.setOnClickListener { vm.requestData(mSourceType ?: "") }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        showListLayout()
 
-        fr_recycler.adapter = vm.standardAdapter
+        if (vm.isFirstLaunched || mAdapter.isEmpty()) {
+            requestData()
+            vm.isFirstLaunched = false
+        } else {
+            mAdapter.update(vm.restoredData)
+        }
 
-        vm.liveNewsResult.observe(parentOwner!!,
-                Observer { it: List<Article>? ->
-                    vm.standardAdapter.addAll(it ?: emptyList())
+
+        vm.output.observe(
+                this, Observer {
+            when (it) {
+                is Outcome.Success -> {
+                    mParentActivity?.showToolbar()
+
+                    if (it.data.isEmpty()) {
+                        showEmptyLayout()
+                    } else {
+                        showListLayout()
+                    }
+
+                    if (!mAdapter.containsAll(it.data)) {
+                        mAdapter.update(it.data)
+                    }
                 }
-        )
-
-        vm.liveNewsErrors.observe(this,
-                Observer {
-                    toastShort("Error occured")
-                    propertyObserver.updateValue(Constants.RequestState.ERROR)
+                is Outcome.Failure -> {
+                    context?.let {
+                        if (context?.isNetworkConnected() != true) {
+                            mParentActivity?.hideToolbar()
+                            showErrorLayout()
+                        }
+                    }
                 }
+                is Outcome.Progress -> {
+                    swipe_ref.isRefreshing = it.isLoading
+                }
+            }
+        }
         )
+    }
+
+    private fun showListLayout() {
+        if (error_simple_simple_list.visibility != View.VISIBLE) {
+            error_simple_no_internet_connection.visibility = View.GONE
+            error_simple_simple_list.visibility = View.VISIBLE
+            error_simple_empty_layout.visibility = View.GONE
+        }
+    }
+
+    private fun showErrorLayout() {
+        if (error_simple_no_internet_connection.visibility != View.VISIBLE) {
+            error_simple_no_internet_connection.visibility = View.VISIBLE
+            error_simple_simple_list.visibility = View.GONE
+            error_simple_empty_layout.visibility = View.GONE
+        }
+    }
+
+    private fun showEmptyLayout() {
+        if (error_simple_empty_layout.visibility != View.VISIBLE) {
+            endStackImg.setColor(R.color.colorAccent)
+            error_simple_no_internet_connection.visibility = View.GONE
+            error_simple_simple_list.visibility = View.GONE
+            error_simple_empty_layout.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.info_fragment_menu, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
-            R.id.action_refresh -> {
+            R.id.info_refresh -> {
                 requestData()
-                logd("onOptionsItemSelected")
+            }
+            android.R.id.home -> {
             }
         }
         return false
     }
 
-
-    override fun onResume() {
-        super.onResume()
-        requestData()
-    }
 
     override fun onPause() {
         super.onPause()
@@ -159,7 +217,7 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onRefresh() {
         checkNotNull(mSourceType)
-        vm.requestData(mSourceType!!)
+        vm.requestData(mSourceType ?: "")
     }
 
     private fun requestData() {
@@ -167,21 +225,6 @@ class InfoFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         vm.requestData(mSourceType ?: "")
     }
 
-    private fun doOnIdle() {
-        swipe_ref.isRefreshing = false
-    }
-
-    private fun doOnLoading() {
-        swipe_ref.isRefreshing = true
-    }
-
-    private fun doOnError() {
-        swipe_ref.isRefreshing = false
-    }
-
-    private fun doOnComplete() {
-        swipe_ref.isRefreshing = false
-    }
 
     companion object {
         private const val FRAGMENT_NAME = "frag_name"

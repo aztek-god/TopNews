@@ -4,7 +4,7 @@
     <item
         android:id="@+id/action_subscription"
         android:orderInCategory="100"
-        android:title="Manage subscriptions" />
+        android:title="@string/manage_subscriptions_menu_title" />
 
     <item
         android:id="@+id/action_refresh"

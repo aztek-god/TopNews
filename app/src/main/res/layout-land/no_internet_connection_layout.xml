@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:layout_editor_absoluteY="25dp">
+
 
     <ImageView
         android:id="@+id/imageView2"
@@ -29,7 +31,7 @@
         android:layout_marginBottom="32dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="Whoops!"
+        android:text="@string/whoops"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textColor="@color/colorPrimary"
         android:textStyle="bold"
@@ -47,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:layout_marginEnd="8dp"
-        android:text="No internet connections found. Check your connection or try again"
+        android:text="@string/no_internet_connections_found_check_your_connection_or_try_again"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textColor="@color/colorPrimary"
@@ -65,11 +67,12 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:background="@drawable/ic_btn_rounded_primary"
-        android:text="Retry"
+        android:text="@string/retry"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/no_internet_message"
         app:layout_constraintTop_toBottomOf="@+id/no_internet_message" />
+
 </android.support.constraint.ConstraintLayout>

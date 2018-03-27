@@ -10,7 +10,6 @@ import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.view.*
 import dv.serg.lib.collection.StandardAdapter
-import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
 import dv.serg.topnews.di.Injector
 import dv.serg.topnews.ui.activity.SubSourceActivity
@@ -66,12 +65,13 @@ class SubscribeFragment : Fragment(), ActionMode.Callback {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        logd("SubscribeFragment:onCreateView")
         return inflater.inflate(R.layout.simple_list_layout, container, true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        swipe_ref.isEnabled = false
 
 
         fr_recycler.apply {

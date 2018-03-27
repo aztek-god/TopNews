@@ -2,11 +2,11 @@ package dv.serg.topnews.ui.viewmodel
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import dv.serg.topnews.app.performOnIoThread
 import dv.serg.topnews.dao.ArticleContract
+import dv.serg.topnews.data.Outcome
+import dv.serg.topnews.exts.performOnIoThread
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.model.Response
-import dv.serg.topnews.util.Outcome
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable

@@ -1,0 +1,91 @@
+<resources>
+    <string name="app_name">Главные новости</string>
+    <string name="title_activity_main">Главное окно</string>
+
+
+    <string name="business">Бизнесс</string>
+    <string name="entertainment">Развлечения</string>
+    <string name="general">Общее</string>
+    <string name="health">Здоровье</string>
+    <string name="science">Наука</string>
+    <string name="sports">Спорт</string>
+    <string name="technology">Технологии</string>
+
+    <string name="source_name">Источник: </string>
+    <string name="published_at">Опубликовано </string>
+    <string name="news">Новости</string>
+
+    <string-array name="months">
+        <item>Январь</item>
+        <item>Февраль</item>
+        <item>Март</item>
+        <item>Апрель</item>
+        <item>Май</item>
+        <item>Июнь</item>
+        <item>Июль</item>
+        <item>Август</item>
+        <item>Сентябрь</item>
+        <item>Октябрь</item>
+        <item>Ноябрь</item>
+        <item>Декабрь</item>
+    </string-array>
+    <string name="title_activity_navigation">Навигационное окно</string>
+
+    <string name="navigation_drawer_open">Открыть навигационную панель</string>
+    <string name="navigation_drawer_close">Закрыть навигационную панель</string>
+
+    <string name="action_settings">Настройки</string>
+    <string name="hot_news">Топовые новости</string>
+    <string name="bookmarks">Закладки</string>
+    <string name="sources">Новостные ресурсы</string>
+    <string name="refresh">Обновить</string>
+    <string name="title_activity_search">Поиск</string>
+    <string name="search">Поиск</string>
+    <string name="title_activity_subscribe">Подписки</string>
+    <string name="action_mode_selected_sources">Выбрано</string>
+    <string name="toast_button_exit_message">Пожалуйста, нажмите еще раз.</string>
+    <string name="search_view_hint">Поиск</string>
+    <string name="net_not_available">Нет соединения. Попробуйте еще раз.</string>
+    <string name="net_alert_message">Оооп!</string>
+    <string name="net_internet_not_available_button_name">Попробовать снова</string>
+    <string name="network_error">Ошибка сети</string>
+    <string name="intent_chooser">Выберите браузер</string>
+    <string name="copy_url">Скопировать ссылку</string>
+    <string name="visit_site">Перейти на сайт</string>
+    <string name="copy_image_url">Скопировать ссылку на изображение</string>
+    <string name="add_to_filter">Добавить в фильтр</string>
+    <string name="add_to_bookmarks">Добавить в закладки</string>
+    <string name="today">Сегодня</string>
+    <string name="yesterday">Вчера</string>
+    <string name="toast_data_restored">Данные востановлены</string>
+    <string name="undo_snackbar_button_name">Отменить</string>
+    <string name="snackbar_undo_title">Отменить удаление?</string>
+    <string name="history_fragment_label">История</string>
+    <string name="bookmark_fragment_label">Закладки</string>
+    <string name="there_were_no_any_search_queries">Нет истории поисковых запросов</string>
+    <string name="ok">OK</string>
+    <string name="screen_title_bookmarks">Закладки</string>
+    <string name="screen_title_history">История</string>
+    <string name="screen_title_news">Новости</string>
+    <string name="screen_title_hot_news">Горячие новости</string>
+    <string name="manage_subscriptions_menu_title">Менеджер подписок</string>
+    <string name="menu_delay_toast_url_copied">Ссылка скопирована.</string>
+    <string name="menu_delay_toast_image_url_copied">Ссылка на изображение скопирована.</string>
+    <string name="menu_delay_toast_temp_toast">Новость добавлена в фильтр.</string>
+    <string name="menu_delay_toast_add_to_bookmarks">Добавлено в закладки.</string>
+    <string name="forward_record_button">Перейти</string>
+    <string name="delete_record_button">Удалить</string>
+    <string name="empty_record_message">Пока ничего нет</string>
+    <string name="empty_record_message_2">Сохраняйте новости и статьи, чтобы прочитать их позже</string>
+    <string name="there_is_no_available_articles">There is no available articles.</string>
+    <string name="clear_filter_btn">Сбросить фильтр</string>
+    <string name="submit">Подтвердить</string>
+    <string name="top_news">Топовые новости</string>
+    <string name="whoops">Ууупс!</string>
+    <string name="no_internet_connections_found_check_your_connection_or_try_again">Нет соединения. Попробуйте снова.</string>
+    <string name="retry">Повторить</string>
+    <string name="no_internet">Нет сети!</string>
+    <string name="lorem_ipsum_dolor_sit_amet_consectetur_adipising_elit">Lorem ipsum dolor sit amet, consectetur adipising elit.</string>
+    <string name="search_history">Искать в истории</string>
+    <string name="clear">Очистить</string>
+</resources>

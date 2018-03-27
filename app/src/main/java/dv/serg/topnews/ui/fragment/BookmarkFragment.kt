@@ -12,10 +12,10 @@ import android.view.ViewGroup
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.topnews.R
 import dv.serg.topnews.di.Injector
+import dv.serg.topnews.exts.update
 import dv.serg.topnews.model.Article
-import dv.serg.topnews.ui.holder.HistoryViewHolder
+import dv.serg.topnews.ui.holder.RecordViewHolder
 import dv.serg.topnews.ui.viewmodel.RecordViewModel
-import dv.serg.topnews.util.update
 import kotlinx.android.synthetic.main.simple_list_layout.*
 import javax.inject.Inject
 
@@ -30,18 +30,16 @@ class BookmarkFragment : Fragment() {
         viewModel
     }
 
+    private var mAdapter: StandardAdapter<Article, RecordViewHolder>? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         Injector.injectFragment(this)
 
-        if (vm.adapter == null) {
-            vm.adapter = StandardAdapter(R.layout.history_item_layout, { view ->
-                HistoryViewHolder(view = view, actionButtonCallback = {
-                    TODO("implement button")
-                }, actionDeleteCallback = {
-                    TODO("implement button")
-                })
+        if (mAdapter == null) {
+            mAdapter = StandardAdapter(R.layout.record_item_layout, { view ->
+                RecordViewHolder(view = view)
             })
         }
     }
@@ -57,14 +55,14 @@ class BookmarkFragment : Fragment() {
 
         vm.articles.observe(this,
                 Observer { data ->
-                    vm.adapter?.update(data ?: emptyList())
+                    mAdapter?.update(data ?: emptyList())
                 })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fr_recycler.apply {
-            adapter = vm.adapter
+            adapter = mAdapter
             layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         }
     }

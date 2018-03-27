@@ -5,7 +5,12 @@ import android.support.design.widget.BottomSheetDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import dv.serg.topnews.R
+import dv.serg.topnews.app.AppContext
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import java.util.concurrent.TimeUnit
 
 class BottomMenuSheetDialog : BottomSheetDialogFragment() {
 
@@ -29,15 +34,39 @@ class BottomMenuSheetDialog : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         v1 = view.findViewById(R.id.item_1)
-        v1?.setOnClickListener { action1.invoke() }
+        v1?.setOnClickListener {
+            action1.invoke()
+            dismiss()
+        }
         v2 = view.findViewById(R.id.item_2)
-        v2?.setOnClickListener { action2.invoke() }
+        v2?.setOnClickListener {
+            action2.invoke()
+            delayToast(getString(R.string.menu_delay_toast_url_copied))
+            dismiss()
+        }
         v3 = view.findViewById(R.id.item_3)
-        v3?.setOnClickListener { action3.invoke() }
+        v3?.setOnClickListener {
+            action3.invoke()
+            delayToast(getString(R.string.menu_delay_toast_image_url_copied))
+            dismiss()
+        }
         v4 = view.findViewById(R.id.item_4)
-        v4?.setOnClickListener { action4.invoke() }
+        v4?.setOnClickListener {
+            action4.invoke()
+            delayToast(getString(R.string.menu_delay_toast_temp_toast))
+            dismiss()
+        }
         v5 = view.findViewById(R.id.item_5)
-        v5?.setOnClickListener { action5.invoke() }
+        v5?.setOnClickListener {
+            action5.invoke()
+            delayToast(getString(R.string.menu_delay_toast_add_to_bookmarks))
+            dismiss()
+        }
+    }
+
+    private fun delayToast(msg: String) {
+
+        Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe { Toast.makeText(AppContext.appContext, msg, Toast.LENGTH_SHORT).show() }
     }
 
     fun setOnItem1ClickListener(action: () -> Unit) {

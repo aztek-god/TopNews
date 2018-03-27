@@ -1,22 +1,18 @@
 package dv.serg.topnews.ui.viewmodel
 
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import dv.serg.lib.collection.StandardAdapter
-import dv.serg.topnews.app.Constants
 import dv.serg.topnews.dao.ArticleContract
-import dv.serg.topnews.extension.toLiveData
+import dv.serg.topnews.data.Outcome
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.model.Response
-import dv.serg.topnews.ui.holder.HotNewsHolder
-import dv.serg.topnews.util.ObservableProperty
 import io.reactivex.Completable
 import io.reactivex.CompletableTransformer
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
 import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -28,29 +24,27 @@ class HotNewsViewModel(private val retrofit: Retrofit, private val repo: Article
         fun request(@Query("category") category: String, @Query("country") country: String): Flowable<Response>
     }
 
-    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private val mCompositeDisposable: CompositeDisposable = CompositeDisposable()
 
-    private val newsOutcome: PublishSubject<List<Article>> = PublishSubject.create()
-    private val newsErrorOutcome: PublishSubject<Throwable> = PublishSubject.create()
+    private val liveNewsResult: MutableLiveData<Outcome<List<Article>>> = MutableLiveData()
+    val output: LiveData<Outcome<List<Article>>> get() = liveNewsResult
+
+    var isFirstLaunched = true
+
+    private var mSavedDataPerRotation: MutableList<Article> = mutableListOf()
+
+    val restoredData: List<Article> get() = mSavedDataPerRotation.toList()
 
 
-    val liveNewsResult: LiveData<List<Article>> get() = newsOutcome.toLiveData(compositeDisposable)
-    val liveNewsErrors: LiveData<Throwable> get() = newsErrorOutcome.toLiveData(compositeDisposable)
-
-    lateinit var propertyObserver: ObservableProperty<Constants.RequestState>
-
-    lateinit var standardAdapter: StandardAdapter<Article, HotNewsHolder>
-
-    fun saveHistory(article: Article) {
+    fun saveAsHistory(article: Article) {
         article.type = Article.Type.HISTORY
         Completable.fromAction {
             repo.insert(article)
         }.compose(outsideOfMainThread())
                 .subscribe()
-
     }
 
-    fun saveBookmark(article: Article) {
+    fun saveAsBookmark(article: Article) {
         article.type = Article.Type.BOOKMARK
         Completable.fromAction {
             repo.insert(article)
@@ -58,42 +52,53 @@ class HotNewsViewModel(private val retrofit: Retrofit, private val repo: Article
                 .subscribe()
     }
 
-
     private fun outsideOfMainThread(): CompletableTransformer {
         return CompletableTransformer { upstream -> upstream.subscribeOn(Schedulers.io()).unsubscribeOn(Schedulers.io()) }
     }
 
+    private val mFilterList: MutableList<Article> = ArrayList()
+
+    fun addToFilter(article: Article) {
+        mFilterList.add(article)
+    }
+
     fun requestData(categoryDescriptor: String) {
-        compositeDisposable.add(
+        mCompositeDisposable.add(
                 retrofit.create(NewsService::class.java)
                         .request(categoryDescriptor, "ru")
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doOnSubscribe {
-                            propertyObserver.updateValue(Constants.RequestState.LOADING)
+                        .doOnSubscribe { liveNewsResult.value = Outcome.loading(true) }
+                        .doOnComplete { liveNewsResult.value = Outcome.loading(false) }
+                        .map { it.articles }
+                        .flatMap {
+                            it.forEach { it.sourceName = it.source?.name ?: "" }
+                            Flowable.just(it)
+                        }
+                        .flatMap {
+                            Flowable.just(it.minus(mFilterList))
                         }
                         .flatMap {
                             val outList: MutableList<Article> = ArrayList()
-                            it.articles?.filter { it.description != null && it.urlToImage != null }?.toCollection(outList)
+                            it.filter { it.description != null && it.urlToImage != null }.toCollection(outList)
                             Flowable.just(outList)
                         }
-                        .cache()
-                        .doOnError {
-                            propertyObserver.updateValue(Constants.RequestState.ERROR)
-                        }.doOnComplete {
-                            propertyObserver.updateValue(Constants.RequestState.COMPLETE)
+                        .doOnNext { it: MutableList<Article> ->
+                            if (mSavedDataPerRotation != it) {
+                                mSavedDataPerRotation = it
+                            }
                         }
                         .subscribe(
                                 {
-                                    newsOutcome.onNext(it ?: emptyList())
+                                    liveNewsResult.value = Outcome.success(it)
                                 },
                                 {
-                                    newsErrorOutcome.onNext(it)
+                                    liveNewsResult.value = Outcome.failure(it)
                                 }
                         ))
     }
 
     fun unsubscribe() {
-        compositeDisposable.clear()
+        mCompositeDisposable.clear()
     }
 }

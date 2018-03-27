@@ -7,6 +7,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.topnews.R
+import dv.serg.topnews.exts.context
+import dv.serg.topnews.exts.loadDrawable
 import dv.serg.topnews.model.SubSource
 
 
@@ -33,8 +35,8 @@ class SubSourceViewHolder(private val view: View, private val clickListener: () 
 
         isSelected.isChecked = item.isSelected
 
-//        ContextCompat.getDra
 
-        thumbnail.setImageResource(R.drawable.lenta)
+        context.loadDrawable(item.imageUri, thumbnail)
+
     }
 }

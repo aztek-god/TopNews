@@ -1,7 +1,6 @@
 package dv.serg.topnews.app
 
 import android.app.Application
-import android.support.v4.app.Fragment
 import com.facebook.stetho.Stetho
 import dv.serg.topnews.BuildConfig
 import dv.serg.topnews.R
@@ -9,7 +8,6 @@ import dv.serg.topnews.di.Injector
 import dv.serg.topnews.di.component.AppComponent
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 class AppContext : Application() {
     companion object {
@@ -46,7 +44,6 @@ class AppContext : Application() {
             return datetimeToString(convertDatetimeFromString(date))
         }
 
-        val fragments: MutableMap<Int, Fragment> = HashMap()
     }
 
     override fun onCreate() {

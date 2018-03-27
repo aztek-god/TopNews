@@ -74,6 +74,12 @@ class PrettySearchView(paramContext: Context, attrs: AttributeSet) : CardView(pa
         editSearch.hint = hint
     }
 
+    fun setQuery(query: String) {
+        val text: Editable = editSearch.text
+        text.clear()
+        text.insert(0, query)
+    }
+
     interface OnSearchListener {
         fun onSearchAction(currentQuery: String)
 

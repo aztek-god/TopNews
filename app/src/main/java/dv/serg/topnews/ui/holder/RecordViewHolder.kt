@@ -4,14 +4,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import dv.serg.lib.collection.StandardAdapter
-import dv.serg.lib.utils.logd
 import dv.serg.topnews.R
+import dv.serg.topnews.app.Constants
+import dv.serg.topnews.exts.context
+import dv.serg.topnews.exts.getStringDateTime
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.ui.viewmodel.RecordViewModel
 
-class HistoryViewHolder(view: View,
-                        private val actionButtonCallback: (pos: Int) -> Unit,
-                        private val actionDeleteCallback: (pos: Int) -> Unit)
+class RecordViewHolder(view: View)
     : RecordViewModel.RecordViewHolder(view) {
 
     var adapter: StandardAdapter<Article, RecordViewModel.RecordViewHolder>? = null
@@ -22,19 +22,21 @@ class HistoryViewHolder(view: View,
     private val actionButton: Button = view.findViewById(R.id.action_button)
     private val deleteButton: Button = view.findViewById(R.id.delete_button)
 
+    var actionButtonListener: (adapterPosition: Int) -> Unit = {}
+    var deleteActionListener: (adapterPosition: Int) -> Unit = {}
+
     override fun onBind(position: Int, item: Article) {
-        visitDate.text = item.publishedAt
+        visitDate.text = getStringDateTime(context, item.publishedAt
+                ?: "", Constants.Time.DEFAULT_DATETIME_PATTERN)
         historyTitle.text = item.title
         historyDescription.text = item.description
         actionButton.setOnClickListener {
-            logd("Action button pressed.")
-            // todo implement view page logic
-            actionButtonCallback.invoke(adapterPosition)
+            actionButtonListener.invoke(adapterPosition)
         }
 
         deleteButton.setOnClickListener {
-            adapter!!.removeAt(adapterPosition)
-            actionDeleteCallback.invoke(adapterPosition)
+            deleteActionListener.invoke(adapterPosition)
         }
     }
 }
+

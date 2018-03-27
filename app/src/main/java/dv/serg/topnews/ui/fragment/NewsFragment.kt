@@ -8,7 +8,8 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
+import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -17,17 +18,18 @@ import dv.serg.lib.android.context.v4.toastShort
 import dv.serg.lib.collection.StandardAdapter
 import dv.serg.lib.utils.PaginationScrollListener
 import dv.serg.topnews.R
+import dv.serg.topnews.app.AppContext
+import dv.serg.topnews.data.Outcome
+import dv.serg.topnews.data.SwitchActivity
 import dv.serg.topnews.di.Injector
+import dv.serg.topnews.exts.openBrowser
+import dv.serg.topnews.exts.update
 import dv.serg.topnews.model.Article
 import dv.serg.topnews.ui.activity.NavigationActivity
 import dv.serg.topnews.ui.activity.SearchActivity
 import dv.serg.topnews.ui.activity.SubSourceActivity
 import dv.serg.topnews.ui.holder.NewsViewHolder
 import dv.serg.topnews.ui.viewmodel.NewsViewModel
-import dv.serg.topnews.util.Outcome
-import dv.serg.topnews.util.SwitchActivity
-import dv.serg.topnews.util.openBrowser
-import dv.serg.topnews.util.update
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.list_state_layout.*
@@ -37,7 +39,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
-class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
+class NewsFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     @Inject
     lateinit var mViewModelFactory: ViewModelProvider.Factory
 
@@ -54,7 +56,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var mContext: Context? = null
 
-    private var mfab: FloatingActionButton? = null
 
     private lateinit var mAdapter: StandardAdapter<Article, NewsViewHolder>
 
@@ -72,7 +73,7 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         if (context is NavigationActivity) {
-            mfab = context.fab
+            mParentActivity = context
         }
 
         mOwnerActivity = context as AppCompatActivity
@@ -83,7 +84,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
         super.onDetach()
         mQueryListener = null
         mOwnerActivity = null
-        mfab = null
         mContext = null
         mParentActivity = null
     }
@@ -106,30 +106,28 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
 
 
         mAdapter = StandardAdapter(R.layout.news_item_layout, { v: View ->
-            NewsViewHolder(v) {
-                when (it) {
-                    is NewsViewHolder.OpenBrowserException -> {
+            with(NewsViewHolder(v)) {
+                apply {
+                    fm = childFragmentManager
+                }
+                apply {
+                    addToFilterAction = { item ->
+                        vm.filterList.add(item)
                     }
-                    is NewsViewHolder.LoadImageException -> {
+                }
+                apply {
+                    addToBookmarkAction = { item ->
+                        vm.saveAsBookmark(item)
                     }
                 }
-            }.apply {
-                fm = childFragmentManager
-            }.apply {
-                addToFilterAction = { item ->
-                    vm.filterList.add(item)
-                }
-            }.apply {
-                addToBookmarkAction = { item ->
-                    vm.saveAsBookmark(item)
-                }
-            }.apply {
-                shortClickListener = {
-                    if (it.url == null) {
-                        Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe { toastShort("Page temporarily unavailable.") }
-                    } else {
-                        openBrowser(context!!, it.url!!)
-                        vm.saveAsHistory(it)
+                apply {
+                    shortClickListener = {
+                        if (it.url == null) {
+                            Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe { toastShort("Page temporarily unavailable.") }
+                        } else {
+                            openBrowser(context ?: AppContext.appContext, it.url ?: "")
+                            vm.saveAsHistory(it)
+                        }
                     }
                 }
             }
@@ -178,27 +176,29 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-
-        mfab?.setOnClickListener {
+        mParentActivity?.setFabBtnAction { fab ->
             vm.mQuery = ""
             vm.requestData()
         }
 
+        swipe_ref.setColorSchemeColors(ContextCompat.getColor(AppContext.appContext, R.color.colorAccent))
+
+        mParentActivity?.showToolbar()
+
+
         if (vm.mQuery.isEmpty()) {
-            mfab?.hide()
+            mParentActivity?.fabBtnHide()
         } else {
-            mfab?.show()
+            mParentActivity?.fabBtnShow()
         }
 
         vm.mQueryChangeListener = {
             if (it.isEmpty()) {
-                mfab?.hide()
+                mParentActivity?.fabBtnHide()
             } else {
-                mfab?.show()
+                mParentActivity?.fabBtnShow()
             }
         }
-
-
 
         vm.liveNewsResult.observe(
                 this,
@@ -207,9 +207,13 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                         is Outcome.Success -> {
                             showListLayout()
                             if (vm.loadMode == NewsViewModel.LoadMode.UPDATE) {
-                                mAdapter.update(it.data)
+                                if (!mAdapter.containsAll(it.data)) {
+                                    mAdapter.update(it.data)
+                                }
                             } else {
-                                mAdapter.addAll(it.data)
+                                if (!mAdapter.containsAll(it.data)) {
+                                    mAdapter.addAll(it.data)
+                                }
                             }
                         }
                         is Outcome.Progress -> {
@@ -222,14 +226,6 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
         )
-
-        vm.isSearch.observe(this, Observer {
-            if (vm.isSearch.value == true) {
-                mParentActivity?.fab?.show()
-            } else {
-                mParentActivity?.fab?.hide()
-            }
-        })
 
         if (!vm.isFirstLaunched) {
             vm.isFirstLaunched = true
@@ -263,15 +259,15 @@ class NewsFragment : LoggingFragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
             R.id.action_search -> {
-                startActivityForResult(Intent(activity, SearchActivity::class.java), SearchActivity.SEARCH_QUERY_CODE)
-                activity?.overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
-
+                startActivityForResult(Intent(mParentActivity, SearchActivity::class.java), SearchActivity.SEARCH_QUERY_CODE)
+                mParentActivity?.enterTransition()
                 resetPagination()
+
                 true
             }
             R.id.action_subscription -> {
-                startActivityForResult(Intent(activity, SubSourceActivity::class.java), SubSourceActivity.SUBSCRIPTION_RESULT_CODE)
-                activity?.overridePendingTransition(R.anim.push_in_right_to_left, R.anim.push_out_right_to_left)
+                startActivityForResult(Intent(mParentActivity, SubSourceActivity::class.java), SubSourceActivity.SUBSCRIPTION_RESULT_CODE)
+                mParentActivity?.enterTransition()
                 true
             }
             R.id.action_refresh -> {

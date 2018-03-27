@@ -10,7 +10,6 @@ import io.reactivex.Flowable
 @Dao
 interface SubSourceDao {
 
-    // todo make a constant from news_resource and replace all occupancies in code
     @Query(value = "SELECT * FROM news_resource")
     fun getAll(): Flowable<List<SubSource>>
 

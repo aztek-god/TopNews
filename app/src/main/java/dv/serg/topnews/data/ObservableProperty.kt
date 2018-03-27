@@ -1,4 +1,4 @@
-package dv.serg.topnews.util
+package dv.serg.topnews.data
 
 class ObservableProperty<T>(private var propertyValue: T) {
     private var observers: MutableList<PropertyObserver<T>> = ArrayList()

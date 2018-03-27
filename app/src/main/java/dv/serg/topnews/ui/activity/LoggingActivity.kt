@@ -123,7 +123,6 @@ abstract class LoggingActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 
-//    onActivityResult
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         logd("${hashCode()}:onActivityResult{requestCode = $data, resultCode = $resultCode, data = $data}")

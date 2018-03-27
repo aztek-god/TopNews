@@ -10,9 +10,9 @@
         android:id="@+id/item_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
         android:orientation="horizontal"
         android:paddingBottom="8dp"
         android:paddingLeft="16dp"
@@ -53,7 +53,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginEnd="32dp"
-            android:src="@drawable/ic_share_black_24dp"
+            android:src="@drawable/ic_content_copy_black_24dp"
             android:tint="#737373" />
 
         <TextView
@@ -83,7 +83,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginEnd="32dp"
-            android:src="@drawable/ic_link_black_24dp"
+            android:src="@drawable/ic_copy_img"
             android:tint="#737373" />
 
         <TextView
@@ -113,7 +113,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginEnd="32dp"
-            android:src="@drawable/ic_content_copy_black_24dp"
+            android:src="@drawable/ic_filter_list"
             android:tint="#737373" />
 
         <TextView
@@ -143,7 +143,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginEnd="32dp"
-            android:src="@drawable/ic_email_black_24dp"
+            android:src="@drawable/ic_bookmark"
             android:tint="#737373" />
 
         <TextView
