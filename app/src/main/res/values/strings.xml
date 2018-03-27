@@ -77,7 +77,7 @@
     <string name="delete_record_button">Delete</string>
     <string name="empty_record_message">There is nothing to show.</string>
     <string name="empty_record_message_2">Save your articles to read them later.</string>
-    <string name="clear_filter_btn">Сбросить фильтр</string>
+    <string name="clear_filter_btn">Clear filter</string>
     <string name="submit">Submit</string>
     <string name="there_is_no_available_articles">There is no available articles.</string>
     <string name="top_news">Top News</string>
