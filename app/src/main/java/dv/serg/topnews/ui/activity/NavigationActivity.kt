@@ -158,17 +158,21 @@ class NavigationActivity : AbstractActivity(), NavigationView.OnNavigationItemSe
         when (menuItemRes) {
             R.id.hot_news_item -> {
                 toolbar.title = getString(R.string.screen_title_hot_news)
+                fabBtnHide()
                 vm.currentFragment = HotNewsFragment()
             }
             R.id.news_item -> {
+                fabBtnHide()
                 toolbar.title = getString(R.string.screen_title_news)
                 vm.currentFragment = NewsFragment()
             }
             R.id.history_item -> {
+                fabBtnHide()
                 toolbar.title = getString(R.string.screen_title_history)
                 vm.currentFragment = RecordFragment.newInstance(RecordFragment.Companion.Type.HISTORY)
             }
             R.id.bookmark_item -> {
+                fabBtnHide()
                 toolbar.title = getString(R.string.screen_title_bookmarks)
                 vm.currentFragment = RecordFragment.newInstance(RecordFragment.Companion.Type.BOOKMARK)
             }
