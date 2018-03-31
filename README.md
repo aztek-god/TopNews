@@ -26,4 +26,4 @@ The handy android news parser application.
 
 The news loads https://newsapi.org which gives simple api and authorization.
 
-[![](https://goo.gl/DxpbJK)](https://pandao.github.io/editor.md/examples/images/7.jpg "李健首张专辑《似水流年》封面")
+[![](https://goo.gl/DxpbJK)](https://play.google.com/store/apps/details?id=dv.serg.topnews "")
